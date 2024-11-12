@@ -1,6 +1,5 @@
 package org.utils;
 
-import org.omg.CORBA.PUBLIC_MEMBER;
 
 public class ServiceSimEvents {
     private static final int BASE = 50;

@@ -1,17 +1,16 @@
 package org.infrastructureProvider.entities;
 
+import io.github.hit_ices.serviceSim.service.HostManager;
+import io.github.hit_ices.serviceSim.service.VmCloudletSchedulerManagerService;
 import javafx.util.Pair;
 import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.ResCloudlet;
 import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
-import org.cloudbus.cloudsim.lists.VmList;
 import org.enduser.networkPacket.*;
-import org.infrastructureProvider.policies.CloudletScheduler;
 import org.infrastructureProvider.policies.NetworkCloudletScheduler;
 import org.infrastructureProvider.policies.VmAllocationPolicy;
 import org.serviceProvider.capacities.LoadAdmission;
@@ -25,7 +24,10 @@ import org.utils.Location;
 import org.utils.PolicyConstants;
 import org.utils.ServiceSimEvents;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class NetworkDevice extends Datacenter {
 
@@ -117,8 +119,10 @@ public class NetworkDevice extends Datacenter {
      */
     public NetworkDevice(String name, DatacenterCharacteristics characteristics,
                          VmAllocationPolicy vmAllocationPolicy, List<Storage> storageList, double schedulingInterval,
-                         Location location, GeoCoverage geoCoverage, String identify, int level) throws Exception {
-        super(name, characteristics, vmAllocationPolicy, storageList, schedulingInterval);
+                         Location location, GeoCoverage geoCoverage, String identify, int level,
+                         HostManager hostManager
+    ) throws Exception {
+        super(name, characteristics, vmAllocationPolicy, storageList, schedulingInterval, hostManager);
         this.location = location;
         this.geoCoverage = geoCoverage;
         this.identify = identify;
@@ -357,7 +361,7 @@ public class NetworkDevice extends Datacenter {
 
             Host host = getVmAllocationPolicy().getHost(key,instanceIdToCloudlet.get(key).get(0).getUserId());
             Vm vm = host.getVm(key,instanceIdToCloudlet.get(key).get(0).getUserId());
-            NetworkCloudletScheduler scheduler = (NetworkCloudletScheduler) vm.getCloudletScheduler();
+            NetworkCloudletScheduler scheduler = (NetworkCloudletScheduler) getVmCloudletSchedulerManager().getManager(vm);
 
             Log.printLine(CloudSim.clock() + ": " + getName() + ": some cloudlets"
                     + "has arrivalled in Datacenter #" + getId() + " and submitted to vm #" + vm.getId());
@@ -373,8 +377,8 @@ public class NetworkDevice extends Datacenter {
     }
 
     public void cloudletProcessUpdate(Vm vm){
-        double nextCheckInterval = vm.updateVmProcessing(CloudSim.clock(), getVmAllocationPolicy().getHost(vm).getVmScheduler()
-                .getAllocatedMipsForVm(vm));
+        double nextCheckInterval = getVmCloudletSchedulerManager().updateVmProcessing(vm,
+                CloudSim.clock(),  getAllocatedMipsForVm(vm));
         if (nextCheckInterval > 0 && nextCheckInterval!=Double.MAX_VALUE){
             send(getId(), nextCheckInterval, ServiceSimEvents.Cloudlet_PROCESS_UPDATE,vm);
         }
@@ -382,7 +386,7 @@ public class NetworkDevice extends Datacenter {
 
     public void cloudletProcessChecking(Vm vm){
 
-        NetworkCloudletScheduler networkCloudletScheduler = (NetworkCloudletScheduler) vm.getCloudletScheduler();
+        NetworkCloudletScheduler networkCloudletScheduler = (NetworkCloudletScheduler) getVmCloudletSchedulerManager().getManager(vm);
         // check send packets
         ArrayList<NetworkPacket> sendToSelf = new ArrayList<>();
         for (int key : networkCloudletScheduler.getPkttosend().keySet()){
@@ -459,7 +463,7 @@ public class NetworkDevice extends Datacenter {
             int userId = networkPacketMap.get(instanceId).get(0).getUserId();
             Host host = getVmAllocationPolicy().getHost(instanceId, userId);
             Vm vm = host.getVm(instanceId, userId);
-            NetworkCloudletScheduler scheduler = (NetworkCloudletScheduler) vm.getCloudletScheduler();
+            NetworkCloudletScheduler scheduler = (NetworkCloudletScheduler) getVmCloudletSchedulerManager().getManager(vm);
             for (NetworkPacket networkPacket : networkPacketMap.get(instanceId)) {
                 if (scheduler.getPktrecv().get(networkPacket.getDestinationCloudlet()) == null) {
                     scheduler.getPktrecv().put(networkPacket.getDestinationCloudlet(), new ArrayList<>());
@@ -527,8 +531,7 @@ public class NetworkDevice extends Datacenter {
             if (instance.isBeingInstantiated()) {
                 instance.setBeingInstantiated(false);
             }
-            instance.updateVmProcessing(CloudSim.clock(), getVmAllocationPolicy().getHost(instance).getVmScheduler()
-                    .getAllocatedMipsForVm(instance));
+            getVmCloudletSchedulerManager().updateVmProcessing(instance, CloudSim.clock(),getAllocatedMipsForVm(instance));
             Pair<Integer,MicroserviceInstance> data = new Pair<>(getId(),instance);
             send(getId(),delayInStartUp,ServiceSimEvents.Service_DISCOVERY_ADD,data);
         }
@@ -820,4 +823,7 @@ public class NetworkDevice extends Datacenter {
     }
 
 
+    public VmCloudletSchedulerManagerService getVmCloudletSchedulerManager() {
+        return hostManager.getVmCloudletSchedulerManager();
+    }
 }

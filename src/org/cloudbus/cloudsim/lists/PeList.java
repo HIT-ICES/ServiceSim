@@ -11,6 +11,7 @@ package org.cloudbus.cloudsim.lists;
 import org.cloudbus.cloudsim.Log;
 import org.infrastructureProvider.entities.Pe;
 import org.infrastructureProvider.entities.Vm;
+import org.infrastructureProvider.policies.VmResourceProvisioner;
 
 import java.util.List;
 
@@ -49,10 +50,10 @@ public class PeList {
 	 * @pre id >= 0
 	 * @post $none
 	 */
-	public static <T extends Pe> int getMips(List<T> peList, int id) {
+	public static <T extends Pe> double getMips(List<T> peList, int id) {
 		Pe pe = getById(peList, id);
 		if (pe != null) {
-			return pe.getMips();
+			return pe.getTotalMips();
 		}
 		return -1;
 	}
@@ -65,10 +66,10 @@ public class PeList {
 	 * @pre $none
 	 * @post $none
 	 */
-	public static <T extends Pe> int getTotalMips(List<T> peList) {
-		int totalMips = 0;
+	public static <T extends Pe> double getTotalMips(List<T> peList) {
+		double totalMips = 0;
 		for (Pe pe : peList) {
-			totalMips += pe.getMips();
+			totalMips += pe.getTotalMips();
 		}
 		return totalMips;
 	}
@@ -82,7 +83,7 @@ public class PeList {
 	public static <T extends Pe> double getMaxUtilization(List<T> peList) {
 		double maxUtilization = 0;
 		for (Pe pe : peList) {
-			double utilization = pe.getPeProvisioner().getUtilization();
+			double utilization = (1 - pe.getAvailableMips() / pe.getTotalMips());
 			if (utilization > maxUtilization) {
 				maxUtilization = utilization;
 			}
@@ -97,13 +98,13 @@ public class PeList {
 	 * @param peList the pe list
 	 * @return the utilization
 	 */
-	public static <T extends Pe> double getMaxUtilizationAmongVmsPes(List<T> peList, Vm vm) {
+	public static <T extends Pe> double getMaxUtilizationAmongVmsPes(VmResourceProvisioner<Pe, Double> provisioner, List<T> peList, Vm vm) {
 		double maxUtilization = 0;
 		for (Pe pe : peList) {
-			if (pe.getPeProvisioner().getAllocatedMipsForVm(vm) == null) {
+			if (provisioner.getAllocatedForVm(pe,vm) == null) {
 				continue;
 			}
-			double utilization = pe.getPeProvisioner().getUtilization();
+			double utilization = (1 - pe.getAvailableMips() / pe.getTotalMips());
 			if (utilization > maxUtilization) {
 				maxUtilization = utilization;
 			}
@@ -187,7 +188,7 @@ public class PeList {
 	/**
 	 * Sets the status of PEs of this machine to FAILED. NOTE: <tt>resName</tt> and
 	 * <tt>machineID</tt> are used for debugging purposes, which is <b>ON</b> by default. Use
-	 * {@link #setStatusFailed(boolean)} if you do not want this information.
+	 * {@link #(boolean)} if you do not want this information.
 	 * 
 	 * @param resName the name of the resource
 	 * @param hostId the id of this machine

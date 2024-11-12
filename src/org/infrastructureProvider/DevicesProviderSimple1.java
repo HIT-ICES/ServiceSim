@@ -5,10 +5,6 @@ import org.infrastructureProvider.entities.*;
 import org.infrastructureProvider.policies.PacketSchedulerTimeShared;
 import org.infrastructureProvider.policies.ShortestPathRoutingGenerator;
 import org.infrastructureProvider.policies.VmAllocationPolicySimple;
-import org.infrastructureProvider.policies.VmSchedulerSpaceShared;
-import org.infrastructureProvider.policies.provisioners.BwProvisionerSimple;
-import org.infrastructureProvider.policies.provisioners.PeProvisionerSimple;
-import org.infrastructureProvider.policies.provisioners.RamProvisionerSimple;
 import org.utils.GeoCoverage;
 import org.utils.Location;
 
@@ -139,18 +135,20 @@ public class DevicesProviderSimple1 extends DevicesProvider {
 
             List<Pe> peListTmp = new ArrayList<Pe>();
             for(int j= 0; j < pescount[i]; j++)
-                peListTmp.add(new Pe(j, new PeProvisionerSimple(mipslenght)));
+                peListTmp.add(new Pe(j, mipslenght));
 
-            hostList.add(
-                    new Host(
-                            i,
-                            new RamProvisionerSimple(ram[i]),
-                            new BwProvisionerSimple(bw[i]),
-                            storage[i],
-                            peListTmp,
-                            new VmSchedulerSpaceShared(peListTmp)
-                    )
+            var host=new Host(
+                    i,
+                    storage[i],
+                    peListTmp,
+                    ram[i], bw[i]
+
             );
+            hostList.add(
+                    host
+            );
+            hostManager.getVmScheduler().manage(host);
+            //hostManager.getHostVmSchedulerManagerService().manage(host, new VmSchedulerSpaceShared(peListTmp));
         }
 
         String arch = "x86";      // system architecture
@@ -170,8 +168,8 @@ public class DevicesProviderSimple1 extends DevicesProvider {
         NetworkDevice datacenter = null;
         try {
             datacenter = new NetworkDevice(name, characteristics,
-                    new VmAllocationPolicySimple(hostList), storageList, 0,
-                    location, geoCoverage, identify, level);
+                    new VmAllocationPolicySimple(hostList,hostManager), storageList, 0,
+                    location, geoCoverage, identify, level,hostManager);
         } catch (Exception e) {
             e.printStackTrace();
         }

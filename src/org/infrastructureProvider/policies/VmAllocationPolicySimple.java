@@ -8,15 +8,13 @@
 
 package org.infrastructureProvider.policies;
 
+import io.github.hit_ices.serviceSim.service.HostManager;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.infrastructureProvider.entities.Host;
 import org.infrastructureProvider.entities.Vm;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * VmAllocationPolicySimple is an VmAllocationPolicy that chooses, as the host for a VM, the host
@@ -26,16 +24,18 @@ import java.util.Map;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 1.0
  */
-public class VmAllocationPolicySimple extends VmAllocationPolicy {
-
-	/** The vm table. */
-	private Map<String, Host> vmTable;
+public class VmAllocationPolicySimple implements VmAllocationPolicy {
+	/** The host list. */
+	private final List<? extends Host> hostList;
+    private final HostManager hostManager;
+    /** The vm table. */
+	private final Map<String, Host> vmTable=new HashMap<>();
 
 	/** The used pes. */
-	private Map<String, Integer> usedPes;
+	private final Map<String, Integer> usedPes=new HashMap<>();
 
 	/** The free pes. */
-	private List<Integer> freePes;
+	private final List<Integer> freePes= new ArrayList<>();
 
 	/**
 	 * Creates the new VmAllocationPolicySimple object.
@@ -44,17 +44,15 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	 * @pre $none
 	 * @post $none
 	 */
-	public VmAllocationPolicySimple(List<? extends Host> list) {
-		super(list);
+	public VmAllocationPolicySimple(List<? extends Host> list, HostManager hostManager) {
+		hostList= list;
+        this.hostManager = hostManager;
 
-		setFreePes(new ArrayList<Integer>());
-		for (Host host : getHostList()) {
-			getFreePes().add(host.getNumberOfPes());
+        for (Host host : getHostList()) {
+			freePes.add(host.getNumberOfPes());
 
 		}
 
-		setVmTable(new HashMap<String, Host>());
-		setUsedPes(new HashMap<String, Integer>());
 	}
 
 	/**
@@ -71,11 +69,11 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 		boolean result = false;
 		int tries = 0;
 		List<Integer> freePesTmp = new ArrayList<Integer>();
-		for (Integer freePes : getFreePes()) {
+		for (Integer freePes : freePes) {
 			freePesTmp.add(freePes);
 		}
 
-		if (!getVmTable().containsKey(vm.getUid())) { // if this vm was not created
+		if (!vmTable.containsKey(vm.getUid())) { // if this vm was not created
 			do {// we still trying until we find a host or until we try all of them
 				int moreFree = Integer.MIN_VALUE;
 				int idx = -1;
@@ -89,19 +87,19 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 				}
 
 				Host host = getHostList().get(idx);
-				result = host.vmCreate(vm);
+				result = hostManager.vmCreate(host,vm);
 
 				if (result) { // if vm were succesfully created in the host
-					getVmTable().put(vm.getUid(), host);
-					getUsedPes().put(vm.getUid(), requiredPes);
-					getFreePes().set(idx, getFreePes().get(idx) - requiredPes);
+					vmTable.put(vm.getUid(), host);
+					usedPes.put(vm.getUid(), requiredPes);
+					freePes.set(idx, freePes.get(idx) - requiredPes);
 					result = true;
 					break;
 				} else {
 					freePesTmp.set(idx, Integer.MIN_VALUE);
 				}
 				tries++;
-			} while (!result && tries < getFreePes().size());
+			} while (!result && tries < freePes.size());
 
 		}
 
@@ -117,12 +115,12 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	 */
 	@Override
 	public void deallocateHostForVm(Vm vm) {
-		Host host = getVmTable().remove(vm.getUid());
+		Host host = vmTable.remove(vm.getUid());
 		int idx = getHostList().indexOf(host);
-		int pes = getUsedPes().remove(vm.getUid());
+		int pes = usedPes.remove(vm.getUid());
 		if (host != null) {
-			host.vmDestroy(vm);
-			getFreePes().set(idx, getFreePes().get(idx) + pes);
+			hostManager.vmDestroy(host,vm);
+			freePes.set(idx, freePes.get(idx) + pes);
 		}
 	}
 
@@ -136,7 +134,7 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	 */
 	@Override
 	public Host getHost(Vm vm) {
-		return getVmTable().get(vm.getUid());
+		return vmTable.get(vm.getUid());
 	}
 
 	/**
@@ -150,62 +148,16 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	 */
 	@Override
 	public Host getHost(int vmId, int userId) {
-		return getVmTable().get(Vm.getUid(userId, vmId));
+		return vmTable.get(Vm.getUid(userId, vmId));
 	}
 
-	/**
-	 * Gets the vm table.
-	 * 
-	 * @return the vm table
-	 */
-	public Map<String, Host> getVmTable() {
-		return vmTable;
+	@Override
+	public <T extends Host> List<T> getHostList() {
+		return (List<T>) this.hostList;
 	}
 
-	/**
-	 * Sets the vm table.
-	 * 
-	 * @param vmTable the vm table
-	 */
-	protected void setVmTable(Map<String, Host> vmTable) {
-		this.vmTable = vmTable;
-	}
-
-	/**
-	 * Gets the used pes.
-	 * 
-	 * @return the used pes
-	 */
-	protected Map<String, Integer> getUsedPes() {
-		return usedPes;
-	}
-
-	/**
-	 * Sets the used pes.
-	 * 
-	 * @param usedPes the used pes
-	 */
-	protected void setUsedPes(Map<String, Integer> usedPes) {
-		this.usedPes = usedPes;
-	}
-
-	/**
-	 * Gets the free pes.
-	 * 
-	 * @return the free pes
-	 */
-	protected List<Integer> getFreePes() {
-		return freePes;
-	}
-
-	/**
-	 * Sets the free pes.
-	 * 
-	 * @param freePes the new free pes
-	 */
-	protected void setFreePes(List<Integer> freePes) {
-		this.freePes = freePes;
-	}
+	
+	
 
 	/*
 	 * (non-Javadoc)
@@ -224,13 +176,13 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	 */
 	@Override
 	public boolean allocateHostForVm(Vm vm, Host host) {
-		if (host.vmCreate(vm)) { // if vm has been succesfully created in the host
-			getVmTable().put(vm.getUid(), host);
+		if (hostManager.vmCreate(host,vm)) { // if vm has been succesfully created in the host
+			vmTable.put(vm.getUid(), host);
 
 			int requiredPes = vm.getNumberOfPes();
 			int idx = getHostList().indexOf(host);
-			getUsedPes().put(vm.getUid(), requiredPes);
-			getFreePes().set(idx, getFreePes().get(idx) - requiredPes);
+			usedPes.put(vm.getUid(), requiredPes);
+			freePes.set(idx, freePes.get(idx) - requiredPes);
 
 			Log.formatLine(
 					"%.2f: VM #" + vm.getId() + " has been allocated to the host #" + host.getId(),

@@ -400,7 +400,7 @@ public class InfoPacket implements Packet {
 			return;
 		}
 
-		baudRates.add(new Double(baudRate));
+		baudRates.add(baudRate);
 		if (bandwidth < 0 || baudRate < bandwidth) {
 			bandwidth = baudRate;
 		}

@@ -7,6 +7,8 @@
 
 package org.infrastructureProvider.entities;
 
+import io.github.hit_ices.serviceSim.service.HostManager;
+import io.github.hit_ices.serviceSim.service.VmCloudletSchedulerManagerService;
 import org.cloudbus.cloudsim.*;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
@@ -32,6 +34,7 @@ import java.util.*;
  */
 public class Datacenter extends SimEntity {
 
+	protected final HostManager hostManager;
 	/** The characteristics. */
 	private DatacenterCharacteristics characteristics;
 
@@ -55,20 +58,21 @@ public class Datacenter extends SimEntity {
 
 	/**
 	 * Allocates a new PowerDatacenter object.
-	 * 
-	 * @param name the name to be associated with this entity (as required by Sim_entity class from
-	 *            simjava package)
-	 * @param characteristics an object of DatacenterCharacteristics
-	 * @param storageList a LinkedList of storage elements, for data simulation
+	 *
+	 * @param name               the name to be associated with this entity (as required by Sim_entity class from
+	 *                           simjava package)
+	 * @param characteristics    an object of DatacenterCharacteristics
 	 * @param vmAllocationPolicy the vmAllocationPolicy
+	 * @param storageList        a LinkedList of storage elements, for data simulation
+	 * @param hostManager
 	 * @throws Exception This happens when one of the following scenarios occur:
-	 *             <ul>
-	 *             <li>creating this entity before initializing CloudSim package
-	 *             <li>this entity name is <tt>null</tt> or empty
-	 *             <li>this entity has <tt>zero</tt> number of PEs (Processing Elements). <br>
-	 *             No PEs mean the Cloudlets can't be processed. A CloudResource must contain one or
-	 *             more Machines. A Machine must contain one or more PEs.
-	 *             </ul>
+	 *                   <ul>
+	 *                   <li>creating this entity before initializing CloudSim package
+	 *                   <li>this entity name is <tt>null</tt> or empty
+	 *                   <li>this entity has <tt>zero</tt> number of PEs (Processing Elements). <br>
+	 *                   No PEs mean the Cloudlets can't be processed. A CloudResource must contain one or
+	 *                   more Machines. A Machine must contain one or more PEs.
+	 *                   </ul>
 	 * @pre name != null
 	 * @pre resource != null
 	 * @post $none
@@ -78,7 +82,8 @@ public class Datacenter extends SimEntity {
 			DatacenterCharacteristics characteristics,
 			VmAllocationPolicy vmAllocationPolicy,
 			List<Storage> storageList,
-			double schedulingInterval) throws Exception {
+			double schedulingInterval,
+			HostManager hostManager) throws Exception {
 		super(name);
 		setCharacteristics(characteristics);
 		setVmAllocationPolicy(vmAllocationPolicy);
@@ -99,6 +104,7 @@ public class Datacenter extends SimEntity {
 
 		// stores id of this class
 		getCharacteristics().setId(super.getId());
+		this.hostManager = hostManager;
 	}
 
 	/**
@@ -368,7 +374,7 @@ public class Datacenter extends SimEntity {
 			userId = data[1];
 			vmId = data[2];
 
-			status = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId,userId).getCloudletScheduler()
+			status = getCloudletScheduler(vmId, userId)
 					.getCloudletStatus(cloudletId);
 		}
 
@@ -379,8 +385,8 @@ public class Datacenter extends SimEntity {
 				cloudletId = cl.getCloudletId();
 				userId = cl.getUserId();
 
-				status = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId,userId)
-						.getCloudletScheduler().getCloudletStatus(cloudletId);
+				status = getCloudletScheduler(vmId, userId)
+						.getCloudletStatus(cloudletId);
 			} catch (Exception e) {
 				Log.printLine(getName() + ": Error in processing CloudSimTags.CLOUDLET_STATUS");
 				Log.printLine(e.getMessage());
@@ -448,10 +454,18 @@ public class Datacenter extends SimEntity {
 			if (vm.isBeingInstantiated()) {
 				vm.setBeingInstantiated(false);
 			}
-			vm.updateVmProcessing(CloudSim.clock(), getVmAllocationPolicy().getHost(vm).getVmScheduler()
-					.getAllocatedMipsForVm(vm));
+			getVmCloudletSchedulerManager().updateVmProcessing(
+					vm, CloudSim.clock(), getAllocatedMipsForVm(vm));
 		}
 
+	}
+
+	protected List<Double> getAllocatedMipsForVm(Vm vm) {
+		return hostManager.getVmScheduler().getAllocatedMipsForVm(getVmAllocationPolicy().getHost(vm), vm);
+	}
+
+	private VmCloudletSchedulerManagerService getVmCloudletSchedulerManager() {
+		return hostManager.getVmCloudletSchedulerManager();
 	}
 
 	/**
@@ -501,7 +515,7 @@ public class Datacenter extends SimEntity {
 		Host host = (Host) migrate.get("host");
 
 		getVmAllocationPolicy().deallocateHostForVm(vm);
-		host.removeMigratingInVm(vm);
+		hostManager.removeMigratingInVms(host, vm);
 		boolean result = getVmAllocationPolicy().allocateHostForVm(vm, host);
 		if (!result) {
 			Log.printLine("[Datacenter.processVmMigrate] VM allocation to the destination host failed");
@@ -615,8 +629,9 @@ public class Datacenter extends SimEntity {
 		int destId = array[4];
 
 		// get the cloudlet
-		Cloudlet cl = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId,userId)
-				.getCloudletScheduler().cloudletCancel(cloudletId);
+		Cloudlet cl =
+				getCloudletScheduler(vmId, userId)
+						.cloudletCancel(cloudletId);
 
 		boolean failed = false;
 		if (cl == null) {// cloudlet doesn't exist
@@ -643,7 +658,7 @@ public class Datacenter extends SimEntity {
 				} else {
 					// time to transfer the files
 					double fileTransferTime = predictFileTransferTime(cl.getRequiredFiles());
-					vm.getCloudletScheduler().cloudletSubmit(cl, fileTransferTime);
+					getVmCloudletSchedulerManager().getManager(vm).cloudletSubmit(cl, fileTransferTime);
 				}
 			} else {// the cloudlet will migrate from one resource to another
 				int tag = ((type == CloudSimTags.CLOUDLET_MOVE_ACK) ? CloudSimTags.CLOUDLET_SUBMIT_ACK
@@ -663,6 +678,11 @@ public class Datacenter extends SimEntity {
 			}
 			sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_SUBMIT_ACK, data);
 		}
+	}
+
+	private CloudletScheduler getCloudletScheduler(int vmId, int userId) {
+		return getVmCloudletSchedulerManager().getManager(
+				getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId, userId));
 	}
 
 	/**
@@ -716,8 +736,7 @@ public class Datacenter extends SimEntity {
 						// time to transfer the files
 			double fileTransferTime = predictFileTransferTime(cl.getRequiredFiles());
 			Host host = getVmAllocationPolicy().getHost(vmId, userId);
-			Vm vm = host.getVm(vmId, userId);
-			CloudletScheduler scheduler = vm.getCloudletScheduler();
+			CloudletScheduler scheduler = getCloudletScheduler(vmId, userId);
 			double estimatedFinishTime = scheduler.cloudletSubmit(cl, fileTransferTime);
 			
 			// if this cloudlet is in the exec queue
@@ -787,8 +806,7 @@ public class Datacenter extends SimEntity {
 	 * @post $none
 	 */
 	protected void processCloudletResume(int cloudletId, int userId, int vmId, boolean ack) {
-		double eventTime = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId,userId)
-				.getCloudletScheduler().cloudletResume(cloudletId);
+		double eventTime = getCloudletScheduler(vmId, userId).cloudletResume(cloudletId);
 
 		boolean status = false;
 		if (eventTime > 0.0) { // if this cloudlet is in the exec queue
@@ -822,8 +840,7 @@ public class Datacenter extends SimEntity {
 	 * @post $none
 	 */
 	protected void processCloudletPause(int cloudletId, int userId, int vmId, boolean ack) {
-		boolean status = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId,userId)
-				.getCloudletScheduler().cloudletPause(cloudletId);
+		boolean status = getCloudletScheduler(vmId, userId).cloudletPause(cloudletId);
 
 		if (ack) {
 			int[] data = new int[3];
@@ -848,8 +865,7 @@ public class Datacenter extends SimEntity {
 	 * @post $none
 	 */
 	protected void processCloudletCancel(int cloudletId, int userId, int vmId) {
-		Cloudlet cl = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId,userId)
-				.getCloudletScheduler().cloudletCancel(cloudletId);
+		Cloudlet cl = getCloudletScheduler(vmId, userId).cloudletCancel(cloudletId);
 		sendNow(userId, CloudSimTags.CLOUDLET_CANCEL, cl);
 	}
 
@@ -873,7 +889,7 @@ public class Datacenter extends SimEntity {
 			for (int i = 0; i < list.size(); i++) {
 				Host host = list.get(i);
 				// inform VMs to update processing
-				double time = host.updateVmsProcessing(CloudSim.clock());
+				double time = hostManager.updateVmsProcessing(host, CloudSim.clock());
 				// what time do we expect that the next cloudlet will finish?
 				if (time < smallerTime) {
 					smallerTime = time;
@@ -902,8 +918,9 @@ public class Datacenter extends SimEntity {
 		for (int i = 0; i < list.size(); i++) {
 			Host host = list.get(i);
 			for (Vm vm : host.getVmList()) {
-				while (vm.getCloudletScheduler().isFinishedCloudlets()) {
-					Cloudlet cl = vm.getCloudletScheduler().getNextFinishedCloudlet();
+				var scheduler = getVmCloudletSchedulerManager().getManager(vm);
+				while (scheduler.isFinishedCloudlets()) {
+					Cloudlet cl = scheduler.getNextFinishedCloudlet();
 					if (cl != null) {
 						sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN, cl);
 					}

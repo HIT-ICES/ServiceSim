@@ -1,5 +1,6 @@
 package org.serviceProvider;
 
+import io.github.hit_ices.serviceSim.service.VmCloudletSchedulerManagerService;
 import javafx.util.Pair;
 import org.cloudbus.cloudsim.CloudSimTags;
 import org.cloudbus.cloudsim.Log;
@@ -57,6 +58,7 @@ public class ServiceProvider extends DatacenterBroker {
     // record
 
     private Map<Integer,ArrayList<NetworkPacket>> endUserRequest;
+
 
 
 
@@ -232,6 +234,15 @@ public class ServiceProvider extends DatacenterBroker {
             delayInStartUp = 0;
         }
 
+        createScheduler(serviceId);
+        // purchase type is not used.
+        MicroserviceInstance instance = new MicroserviceInstance(PolicyConstants.vmIdNum,getId(),mips,pesNumber,ram,bw,size,vmm,requestTime,configurationType,0,delayInStartUp,serviceId);
+        devicesProvider.getVmCloudletSchedulerManagerService().manage(instance,createScheduler(serviceId));
+        PolicyConstants.vmIdNum++;
+        return instance;
+    }
+
+    private static CloudletScheduler createScheduler(int serviceId) {
         CloudletScheduler cloudletScheduler = new NetworkCloudletTimeSharedScheduler();
         if (PolicyConstants.VM_CldScheduler == PolicyConstants.TimeShared){
             cloudletScheduler = new NetworkCloudletTimeSharedScheduler();
@@ -244,13 +255,7 @@ public class ServiceProvider extends DatacenterBroker {
         if (serviceId == 0){
             cloudletScheduler = new NetworkCloudletTimeSharedScheduler();
         }
-        // purchase type is not used.
-        MicroserviceInstance instance = new MicroserviceInstance(PolicyConstants.vmIdNum,getId(),mips,pesNumber,ram,bw,size,vmm,cloudletScheduler,requestTime,configurationType,0,delayInStartUp,serviceId);
-//        if (serviceId == 0){
-//            instance.serviceChainId = serviceChainId;
-//        }
-        PolicyConstants.vmIdNum++;
-        return instance;
+        return cloudletScheduler;
     }
 
     @Override

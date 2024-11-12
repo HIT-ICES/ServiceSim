@@ -7,12 +7,7 @@
 
 package org.infrastructureProvider.entities;
 
-import org.cloudbus.cloudsim.Log;
-import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.lists.PeList;
-import org.infrastructureProvider.policies.VmScheduler;
-import org.infrastructureProvider.policies.provisioners.BwProvisioner;
-import org.infrastructureProvider.policies.provisioners.RamProvisioner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,14 +29,23 @@ public class Host {
 	/** The storage. */
 	private long storage;
 
-	/** The ram provisioner. */
-	private RamProvisioner ramProvisioner;
+	/** The ram. */
+	private final int ram;
 
-	/** The bw provisioner. */
-	private BwProvisioner bwProvisioner;
+	/** The available ram. */
+	private int availableRam;
 
-	/** The allocation policy. */
-	private VmScheduler vmScheduler;
+	/** The bw. */
+	private final long bw;
+
+	/** The available bw. */
+	private long availableBw;
+
+	/** The mips. */
+	private double mips;
+
+	/** The available mips. */
+	private double availableMips;
 
 	/** The vm list. */
 	private final List<? extends Vm> vmList = new ArrayList<Vm>();
@@ -62,229 +66,23 @@ public class Host {
 	 * Instantiates a new host.
 	 * 
 	 * @param id the id
-	 * @param ramProvisioner the ram provisioner
-	 * @param bwProvisioner the bw provisioner
 	 * @param storage the storage
 	 * @param peList the pe list
-	 * @param vmScheduler the vm scheduler
 	 */
 	public Host(
-			int id,
-			RamProvisioner ramProvisioner,
-			BwProvisioner bwProvisioner,
-			long storage,
-			List<? extends Pe> peList,
-			VmScheduler vmScheduler) {
-		setId(id);
-		setRamProvisioner(ramProvisioner);
-		setBwProvisioner(bwProvisioner);
+            int id,
+            long storage,
+            List<? extends Pe> peList, int ram, long bw) {
+        this.ram = ram;
+        this.bw = bw;
+        setId(id);
 		setStorage(storage);
-		setVmScheduler(vmScheduler);
 
 		setPeList(peList);
 		setFailed(false);
 	}
 
-	/**
-	 * Requests updating of processing of cloudlets in the VMs running in this host.
-	 * 
-	 * @param currentTime the current time
-	 * @return expected time of completion of the next cloudlet in all VMs in this host.
-	 *         Double.MAX_VALUE if there is no future events expected in this host
-	 * @pre currentTime >= 0.0
-	 * @post $none
-	 */
-	public double updateVmsProcessing(double currentTime) {
-		double smallerTime = Double.MAX_VALUE;
 
-		for (Vm vm : getVmList()) {
-			double time = vm.updateVmProcessing(currentTime, getVmScheduler().getAllocatedMipsForVm(vm));
-			if (time > 0.0 && time < smallerTime) {
-				smallerTime = time;
-			}
-		}
-		return smallerTime;
-	}
-
-	/**
-	 * Adds the migrating in vm.
-	 * 
-	 * @param vm the vm
-	 */
-	public void addMigratingInVm(Vm vm) {
-		vm.setInMigration(true);
-
-		if (!getVmsMigratingIn().contains(vm)) {
-			if (getStorage() < vm.getSize()) {
-				Log.printLine("[VmScheduler.addMigratingInVm] Allocation of VM #" + vm.getId() + " to Host #"
-						+ getId() + " failed by storage");
-				System.exit(0);
-			}
-
-			if (!getRamProvisioner().allocateRamForVm(vm, vm.getCurrentRequestedRam())) {
-				Log.printLine("[VmScheduler.addMigratingInVm] Allocation of VM #" + vm.getId() + " to Host #"
-						+ getId() + " failed by RAM");
-				System.exit(0);
-			}
-
-			if (!getBwProvisioner().allocateBwForVm(vm, vm.getCurrentRequestedBw())) {
-				Log.printLine("[VmScheduler.addMigratingInVm] Allocation of VM #" + vm.getId() + " to Host #"
-						+ getId() + " failed by BW");
-				System.exit(0);
-			}
-
-			getVmScheduler().getVmsMigratingIn().add(vm.getUid());
-			if (!getVmScheduler().allocatePesForVm(vm, vm.getCurrentRequestedMips())) {
-				Log.printLine("[VmScheduler.addMigratingInVm] Allocation of VM #" + vm.getId() + " to Host #"
-						+ getId() + " failed by MIPS");
-				System.exit(0);
-			}
-
-			setStorage(getStorage() - vm.getSize());
-
-			getVmsMigratingIn().add(vm);
-			getVmList().add(vm);
-			updateVmsProcessing(CloudSim.clock());
-			vm.getHost().updateVmsProcessing(CloudSim.clock());
-		}
-	}
-
-	/**
-	 * Removes the migrating in vm.
-	 * 
-	 * @param vm the vm
-	 */
-	public void removeMigratingInVm(Vm vm) {
-		vmDeallocate(vm);
-		getVmsMigratingIn().remove(vm);
-		getVmList().remove(vm);
-		getVmScheduler().getVmsMigratingIn().remove(vm.getUid());
-		vm.setInMigration(false);
-	}
-
-	/**
-	 * Reallocate migrating in vms.
-	 */
-	public void reallocateMigratingInVms() {
-		for (Vm vm : getVmsMigratingIn()) {
-			if (!getVmList().contains(vm)) {
-				getVmList().add(vm);
-			}
-			if (!getVmScheduler().getVmsMigratingIn().contains(vm.getUid())) {
-				getVmScheduler().getVmsMigratingIn().add(vm.getUid());
-			}
-			getRamProvisioner().allocateRamForVm(vm, vm.getCurrentRequestedRam());
-			getBwProvisioner().allocateBwForVm(vm, vm.getCurrentRequestedBw());
-			getVmScheduler().allocatePesForVm(vm, vm.getCurrentRequestedMips());
-			setStorage(getStorage() - vm.getSize());
-		}
-	}
-
-	/**
-	 * Checks if is suitable for vm.
-	 * 
-	 * @param vm the vm
-	 * @return true, if is suitable for vm
-	 */
-	public boolean isSuitableForVm(Vm vm) {
-		return (getVmScheduler().getPeCapacity() >= vm.getCurrentRequestedMaxMips()
-				&& getVmScheduler().getAvailableMips() >= vm.getCurrentRequestedTotalMips()
-				&& getRamProvisioner().isSuitableForVm(vm, vm.getCurrentRequestedRam()) && getBwProvisioner()
-				.isSuitableForVm(vm, vm.getCurrentRequestedBw()));
-	}
-
-	/**
-	 * Allocates PEs and memory to a new VM in the Host.
-	 * 
-	 * @param vm Vm being started
-	 * @return $true if the VM could be started in the host; $false otherwise
-	 * @pre $none
-	 * @post $none
-	 */
-	public boolean vmCreate(Vm vm) {
-		if (getStorage() < vm.getSize()) {
-			Log.printLine("[VmScheduler.vmCreate] Allocation of VM #" + vm.getId() + " to Host #" + getId()
-					+ " failed by storage");
-			return false;
-		}
-
-		if (!getRamProvisioner().allocateRamForVm(vm, vm.getCurrentRequestedRam())) {
-			Log.printLine("[VmScheduler.vmCreate] Allocation of VM #" + vm.getId() + " to Host #" + getId()
-					+ " failed by RAM");
-			return false;
-		}
-
-		if (!getBwProvisioner().allocateBwForVm(vm, vm.getCurrentRequestedBw())) {
-			Log.printLine("[VmScheduler.vmCreate] Allocation of VM #" + vm.getId() + " to Host #" + getId()
-					+ " failed by BW");
-			getRamProvisioner().deallocateRamForVm(vm);
-			return false;
-		}
-
-		if (!getVmScheduler().allocatePesForVm(vm, vm.getCurrentRequestedMips())) {
-			Log.printLine("[VmScheduler.vmCreate] Allocation of VM #" + vm.getId() + " to Host #" + getId()
-					+ " failed by MIPS");
-			getRamProvisioner().deallocateRamForVm(vm);
-			getBwProvisioner().deallocateBwForVm(vm);
-			return false;
-		}
-
-		setStorage(getStorage() - vm.getSize());
-		getVmList().add(vm);
-		vm.setHost(this);
-		return true;
-	}
-
-	/**
-	 * Destroys a VM running in the host.
-	 * 
-	 * @param vm the VM
-	 * @pre $none
-	 * @post $none
-	 */
-	public void vmDestroy(Vm vm) {
-		if (vm != null) {
-			vmDeallocate(vm);
-			getVmList().remove(vm);
-			vm.setHost(null);
-		}
-	}
-
-	/**
-	 * Destroys all VMs running in the host.
-	 * 
-	 * @pre $none
-	 * @post $none
-	 */
-	public void vmDestroyAll() {
-		vmDeallocateAll();
-		for (Vm vm : getVmList()) {
-			vm.setHost(null);
-			setStorage(getStorage() + vm.getSize());
-		}
-		getVmList().clear();
-	}
-
-	/**
-	 * Deallocate all hostList for the VM.
-	 * 
-	 * @param vm the VM
-	 */
-	protected void vmDeallocate(Vm vm) {
-		getRamProvisioner().deallocateRamForVm(vm);
-		getBwProvisioner().deallocateBwForVm(vm);
-		getVmScheduler().deallocatePesForVm(vm);
-		setStorage(getStorage() + vm.getSize());
-	}
-
-	/**
-	 * Deallocate all hostList for the VM.
-	 */
-	protected void vmDeallocateAll() {
-		getRamProvisioner().deallocateRamForAllVms();
-		getBwProvisioner().deallocateBwForAllVms();
-		getVmScheduler().deallocatePesForAllVms();
-	}
 
 	/**
 	 * Returns a VM object.
@@ -327,64 +125,10 @@ public class Host {
 	 * 
 	 * @return the total mips
 	 */
-	public int getTotalMips() {
-		return PeList.getTotalMips(getPeList());
+	public double getTotalMips() {
+		return mips;
 	}
 
-	/**
-	 * Allocates PEs for a VM.
-	 * 
-	 * @param vm the vm
-	 * @param mipsShare the mips share
-	 * @return $true if this policy allows a new VM in the host, $false otherwise
-	 * @pre $none
-	 * @post $none
-	 */
-	public boolean allocatePesForVm(Vm vm, List<Double> mipsShare) {
-		return getVmScheduler().allocatePesForVm(vm, mipsShare);
-	}
-
-	/**
-	 * Releases PEs allocated to a VM.
-	 * 
-	 * @param vm the vm
-	 * @pre $none
-	 * @post $none
-	 */
-	public void deallocatePesForVm(Vm vm) {
-		getVmScheduler().deallocatePesForVm(vm);
-	}
-
-	/**
-	 * Returns the MIPS share of each Pe that is allocated to a given VM.
-	 * 
-	 * @param vm the vm
-	 * @return an array containing the amount of MIPS of each pe that is available to the VM
-	 * @pre $none
-	 * @post $none
-	 */
-	public List<Double> getAllocatedMipsForVm(Vm vm) {
-		return getVmScheduler().getAllocatedMipsForVm(vm);
-	}
-
-	/**
-	 * Gets the total allocated MIPS for a VM over all the PEs.
-	 * 
-	 * @param vm the vm
-	 * @return the allocated mips for vm
-	 */
-	public double getTotalAllocatedMipsForVm(Vm vm) {
-		return getVmScheduler().getTotalAllocatedMipsForVm(vm);
-	}
-
-	/**
-	 * Returns maximum available MIPS among all the PEs.
-	 * 
-	 * @return max mips
-	 */
-	public double getMaxAvailableMips() {
-		return getVmScheduler().getMaxAvailableMips();
-	}
 
 	/**
 	 * Gets the free mips.
@@ -392,7 +136,7 @@ public class Host {
 	 * @return the free mips
 	 */
 	public double getAvailableMips() {
-		return getVmScheduler().getAvailableMips();
+		return availableMips;
 	}
 
 	/**
@@ -402,8 +146,8 @@ public class Host {
 	 * @pre $none
 	 * @post $result > 0
 	 */
-	public long getBw() {
-		return getBwProvisioner().getBw();
+	public long getTotalBw() {
+		return bw;
 	}
 
 	/**
@@ -413,8 +157,8 @@ public class Host {
 	 * @pre $none
 	 * @post $result > 0
 	 */
-	public int getRam() {
-		return getRamProvisioner().getRam();
+	public int getTotalRam() {
+		return availableRam;
 	}
 
 	/**
@@ -446,59 +190,7 @@ public class Host {
 		this.id = id;
 	}
 
-	/**
-	 * Gets the ram provisioner.
-	 * 
-	 * @return the ram provisioner
-	 */
-	public RamProvisioner getRamProvisioner() {
-		return ramProvisioner;
-	}
 
-	/**
-	 * Sets the ram provisioner.
-	 * 
-	 * @param ramProvisioner the new ram provisioner
-	 */
-	protected void setRamProvisioner(RamProvisioner ramProvisioner) {
-		this.ramProvisioner = ramProvisioner;
-	}
-
-	/**
-	 * Gets the bw provisioner.
-	 * 
-	 * @return the bw provisioner
-	 */
-	public BwProvisioner getBwProvisioner() {
-		return bwProvisioner;
-	}
-
-	/**
-	 * Sets the bw provisioner.
-	 * 
-	 * @param bwProvisioner the new bw provisioner
-	 */
-	protected void setBwProvisioner(BwProvisioner bwProvisioner) {
-		this.bwProvisioner = bwProvisioner;
-	}
-
-	/**
-	 * Gets the VM scheduler.
-	 * 
-	 * @return the VM scheduler
-	 */
-	public VmScheduler getVmScheduler() {
-		return vmScheduler;
-	}
-
-	/**
-	 * Sets the VM scheduler.
-	 * 
-	 * @param vmScheduler the vm scheduler
-	 */
-	protected void setVmScheduler(VmScheduler vmScheduler) {
-		this.vmScheduler = vmScheduler;
-	}
 
 	/**
 	 * Gets the pe list.
@@ -537,7 +229,7 @@ public class Host {
 	 * 
 	 * @param storage the new storage
 	 */
-	protected void setStorage(long storage) {
+    public void setStorage(long storage) {
 		this.storage = storage;
 	}
 
@@ -620,4 +312,21 @@ public class Host {
 		this.datacenter = datacenter;
 	}
 
+    public int getAvailableRam() {
+        return availableRam;
+    }
+    public void setAvailableRam(int availableRam) {
+        this.availableRam = availableRam;
+    }
+
+    public long getAvailableBw() {
+        return availableBw;
+    }
+
+    public void setAvailableBw(long availableBw) {
+        this.availableBw = availableBw;
+    }
+    public void setAvailableMips(double availableMips) {
+        this.availableMips = availableMips;
+    }
 }

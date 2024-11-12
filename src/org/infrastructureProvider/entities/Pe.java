@@ -8,7 +8,6 @@
 
 package org.infrastructureProvider.entities;
 
-import org.infrastructureProvider.policies.provisioners.PeProvisioner;
 
 /**
  * CloudSim Pe (Processing Element) class represents CPU unit, defined in terms of Millions
@@ -32,7 +31,8 @@ public class Pe {
 	 * failed because it belongs to a machine which is also failed.
 	 */
 	public static final int FAILED = 3;
-
+	private final double mips;
+	private double availableMips;
 	/** The id. */
 	private int id;
 
@@ -40,21 +40,18 @@ public class Pe {
 	/** The status of Pe: FREE, BUSY, FAILED: . */
 	private int status;
 
-	/** The pe provisioner. */
-	private PeProvisioner peProvisioner;
 
 	/**
 	 * Allocates a new Pe object.
 	 * 
 	 * @param id the Pe ID
-	 * @param peProvisioner the pe provisioner
 	 * @pre id >= 0
 	 * @pre peProvisioner != null
 	 * @post $none
 	 */
-	public Pe(int id, PeProvisioner peProvisioner) {
-		setId(id);
-		setPeProvisioner(peProvisioner);
+	public Pe(int id, double mips) {
+        this.mips = mips;
+        setId(id);
 
 		// when created it should be set to FREE, i.e. available for use.
 		status = FREE;
@@ -78,16 +75,6 @@ public class Pe {
 		return id;
 	}
 
-	/**
-	 * Sets the MIPS Rating of this Pe.
-	 * 
-	 * @param d the mips
-	 * @pre mips >= 0
-	 * @post $none
-	 */
-	public void setMips(double d) {
-		getPeProvisioner().setMips(d);
-	}
 
 	/**
 	 * Gets the MIPS Rating of this Pe.
@@ -96,8 +83,8 @@ public class Pe {
 	 * @pre $none
 	 * @post $result >= 0
 	 */
-	public int getMips() {
-		return (int) getPeProvisioner().getMips();
+	public double getTotalMips() {
+		return mips;
 	}
 
 	/**
@@ -154,22 +141,12 @@ public class Pe {
 		this.status = status;
 	}
 
-	/**
-	 * Sets the pe provisioner.
-	 * 
-	 * @param peProvisioner the new pe provisioner
-	 */
-	protected void setPeProvisioner(PeProvisioner peProvisioner) {
-		this.peProvisioner = peProvisioner;
-	}
 
-	/**
-	 * Gets the Pe provisioner.
-	 * 
-	 * @return the Pe provisioner
-	 */
-	public PeProvisioner getPeProvisioner() {
-		return peProvisioner;
-	}
+    public double getAvailableMips() {
+        return availableMips;
+    }
 
+    public void setAvailableMips(double availableMips) {
+        this.availableMips = availableMips;
+    }
 }

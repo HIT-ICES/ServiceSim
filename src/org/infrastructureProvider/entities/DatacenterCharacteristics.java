@@ -169,7 +169,7 @@ public class DatacenterCharacteristics {
 	 * @pre $none
 	 * @post $result >= -1
 	 */
-	public int getMipsOfOnePe() {
+	public double getMipsOfOnePe() {
 		if (getHostList().size() == 0) {
 			return -1;
 		}
@@ -188,7 +188,7 @@ public class DatacenterCharacteristics {
 	 * @pre peID >= 0
 	 * @post $result >= -1
 	 */
-	public int getMipsOfOnePe(int id, int peId) {
+	public double getMipsOfOnePe(int id, int peId) {
 		if (getHostList().size() == 0) {
 			return -1;
 		}
@@ -212,8 +212,8 @@ public class DatacenterCharacteristics {
 	 * @pre $none
 	 * @post $result >= 0
 	 */
-	public int getMips() {
-		int mips = 0;
+	public double getMips() {
+		double mips = 0;
 		switch (getAllocationPolicy()) {
 		// Assuming all PEs in all Machine have same rating.
 			case DatacenterCharacteristics.TIME_SHARED:

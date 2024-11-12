@@ -8,6 +8,7 @@
 
 package org.infrastructureProvider.policies;
 
+import org.infrastructureProvider.entities.Host;
 import org.infrastructureProvider.entities.Pe;
 import org.infrastructureProvider.entities.Vm;
 
@@ -22,44 +23,46 @@ import java.util.*;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 1.0
  */
-public class VmSchedulerSpaceShared extends VmScheduler {
+public class VmSchedulerSpaceShared extends VmSchedulerBase {
 
 	/** Map containing VM ID and a vector of PEs allocated to this VM. */
-	private Map<String, List<Pe>> peAllocationMap;
+	protected final Map<Host, Map<String, List<Pe>>> peAllocationMap = new HashMap<>();
 
 	/** The free pes vector. */
-	private List<Pe> freePes;
+	protected final Map<Host, List<Pe>> freePesMap = new HashMap<>();
 
+	@Override
+	public void manage(Host host) {
+		super.manage(host);
+		peAllocationMap.put(host, new HashMap<>());
+		freePesMap.put(host, host.getPeList().stream().toList());
+	}
 	/**
 	 * Instantiates a new vm scheduler space shared.
-	 * 
-	 * @param pelist the pelist
+	 *
 	 */
-	public VmSchedulerSpaceShared(List<? extends Pe> pelist) {
-		super(pelist);
-		setPeAllocationMap(new HashMap<String, List<Pe>>());
-		setFreePes(new ArrayList<Pe>());
-		getFreePes().addAll(pelist);
+	public VmSchedulerSpaceShared(VmResourceProvisioner<Pe, Double> provisioner) {
+		super(provisioner);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.cloudbus.cloudsim.VmScheduler#allocatePesForVm(org.cloudbus.cloudsim.Vm,
+	 * @see org.cloudbus.cloudsim.VmSchedulerBase#allocatePesForVm(org.cloudbus.cloudsim.Vm,
 	 * java.util.List)
 	 */
 	@Override
-	public boolean allocatePesForVm(Vm vm, List<Double> mipsShare) {
+	public boolean allocatePesForVm(Host host,Vm vm, List<Double> mipsShare) {
 		// if there is no enough free PEs, fails
-		if (getFreePes().size() < mipsShare.size()) {
+		if (getFreePes(host).size() < mipsShare.size()) {
 			return false;
 		}
 
 		List<Pe> selectedPes = new ArrayList<Pe>();
-		Iterator<Pe> peIterator = getFreePes().iterator();
+		Iterator<Pe> peIterator = getFreePes(host).iterator();
 		Pe pe = peIterator.next();
 		double totalMips = 0;
 		for (Double mips : mipsShare) {
-			if (mips <= pe.getMips()) {
+			if (mips <= pe.getTotalMips()) {
 				selectedPes.add(pe);
 				if (!peIterator.hasNext()) {
 					break;
@@ -72,30 +75,30 @@ public class VmSchedulerSpaceShared extends VmScheduler {
 			return false;
 		}
 
-		getFreePes().removeAll(selectedPes);
+		getFreePes(host).removeAll(selectedPes);
 
-		getPeAllocationMap().put(vm.getUid(), selectedPes);
-		getMipsMap().put(vm.getUid(), mipsShare);
-		setAvailableMips(getAvailableMips() - totalMips);
+		getPeAllocationMap(host).put(vm.getUid(), selectedPes);
+		mipsMap.get(host).put(vm.getUid(), mipsShare);
+		availableMipsMap.put(host,getAvailableMips(host) - totalMips);
 		return true;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.cloudbus.cloudsim.VmScheduler#deallocatePesForVm(org.cloudbus.cloudsim.Vm)
+	 * @see org.cloudbus.cloudsim.VmSchedulerBase#deallocatePesForVm(org.cloudbus.cloudsim.Vm)
 	 */
 	@Override
-	public void deallocatePesForVm(Vm vm) {
-		getFreePes().addAll(getPeAllocationMap().get(vm.getUid()));
-		getPeAllocationMap().remove(vm.getUid());
+	public void deallocatePesForVm(Host host,Vm vm) {
+		getFreePes(host).addAll(getPeAllocationMap(host).get(vm.getUid()));
+		getPeAllocationMap(host).remove(vm.getUid());
 
 		double totalMips = 0;
-		for (double mips : getMipsMap().get(vm.getUid())) {
+		for (double mips : mipsMap.get(host).get(vm.getUid())) {
 			totalMips += mips;
 		}
-		setAvailableMips(getAvailableMips() + totalMips);
+		availableMipsMap.put(host,getAvailableMips(host) + totalMips);
 
-		getMipsMap().remove(vm.getUid());
+		mipsMap.get(host).remove(vm.getUid());
 	}
 
 	/**
@@ -103,8 +106,8 @@ public class VmSchedulerSpaceShared extends VmScheduler {
 	 * 
 	 * @param peAllocationMap the pe allocation map
 	 */
-	protected void setPeAllocationMap(Map<String, List<Pe>> peAllocationMap) {
-		this.peAllocationMap = peAllocationMap;
+	protected void setPeAllocationMap(Host host,Map<String, List<Pe>> peAllocationMap) {
+		this.peAllocationMap.put(host, peAllocationMap);
 	}
 
 	/**
@@ -112,8 +115,8 @@ public class VmSchedulerSpaceShared extends VmScheduler {
 	 * 
 	 * @return the pe allocation map
 	 */
-	protected Map<String, List<Pe>> getPeAllocationMap() {
-		return peAllocationMap;
+	protected Map<String, List<Pe>> getPeAllocationMap(Host host) {
+		return peAllocationMap.get(host);
 	}
 
 	/**
@@ -121,8 +124,8 @@ public class VmSchedulerSpaceShared extends VmScheduler {
 	 * 
 	 * @param freePes the new free pes vector
 	 */
-	protected void setFreePes(List<Pe> freePes) {
-		this.freePes = freePes;
+	protected void setFreePes(Host host,List<Pe> freePes) {
+		this.freePesMap.put(host,freePes);
 	}
 
 	/**
@@ -130,8 +133,8 @@ public class VmSchedulerSpaceShared extends VmScheduler {
 	 * 
 	 * @return the free pes vector
 	 */
-	protected List<Pe> getFreePes() {
-		return freePes;
+	protected List<Pe> getFreePes(Host host) {
+		return freePesMap.get(host);
 	}
 
 }

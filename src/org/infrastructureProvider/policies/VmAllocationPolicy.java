@@ -8,6 +8,7 @@
 
 package org.infrastructureProvider.policies;
 
+import io.github.hit_ices.serviceSim.service.VmCloudletSchedulerManagerService;
 import org.infrastructureProvider.entities.Host;
 import org.infrastructureProvider.entities.Vm;
 
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * VmAllocationPolicy is an abstract class that represents the provisioning policy of hosts to
+ * VmAllocationPolicy is an class that represents the provisioning policy of hosts to
  * virtual machines in a Datacentre. It supports two-stage commit of reservation of hosts: first, we
  * reserve the host and, once commited by the user, it is effectivelly allocated to he/she
  * 
@@ -23,21 +24,7 @@ import java.util.Map;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 1.0
  */
-public abstract class VmAllocationPolicy {
-
-	/** The host list. */
-	private List<? extends Host> hostList;
-
-	/**
-	 * Allocates a new VmAllocationPolicy object.
-	 * 
-	 * @param list Machines available in this Datacentre
-	 * @pre $none
-	 * @post $none
-	 */
-	public VmAllocationPolicy(List<? extends Host> list) {
-		setHostList(list);
-	}
+public interface VmAllocationPolicy {
 
 	/**
 	 * Allocates a host for a given VM. The host to be allocated is the one that was already
@@ -48,7 +35,7 @@ public abstract class VmAllocationPolicy {
 	 * @pre $none
 	 * @post $none
 	 */
-	public abstract boolean allocateHostForVm(Vm vm);
+	public boolean allocateHostForVm(Vm vm);
 
 	/**
 	 * Allocates a specified host for a given VM.
@@ -58,7 +45,7 @@ public abstract class VmAllocationPolicy {
 	 * @pre $none
 	 * @post $none
 	 */
-	public abstract boolean allocateHostForVm(Vm vm, Host host);
+	public boolean allocateHostForVm(Vm vm, Host host);
 
 	/**
 	 * Optimize allocation of the VMs according to current utilization.
@@ -68,7 +55,7 @@ public abstract class VmAllocationPolicy {
 	 * @param time the time
 	 * @return the array list< hash map< string, object>>
 	 */
-	public abstract List<Map<String, Object>> optimizeAllocation(List<? extends Vm> vmList);
+	public List<Map<String, Object>> optimizeAllocation(List<? extends Vm> vmList);
 
 	/**
 	 * Releases the host used by a VM.
@@ -77,7 +64,7 @@ public abstract class VmAllocationPolicy {
 	 * @pre $none
 	 * @post $none
 	 */
-	public abstract void deallocateHostForVm(Vm vm);
+	public void deallocateHostForVm(Vm vm);
 
 	/**
 	 * Get the host that is executing the given VM belonging to the given user.
@@ -87,7 +74,7 @@ public abstract class VmAllocationPolicy {
 	 * @pre $none
 	 * @post $none
 	 */
-	public abstract Host getHost(Vm vm);
+	public Host getHost(Vm vm);
 
 	/**
 	 * Get the host that is executing the given VM belonging to the given user.
@@ -98,16 +85,8 @@ public abstract class VmAllocationPolicy {
 	 * @pre $none
 	 * @post $none
 	 */
-	public abstract Host getHost(int vmId, int userId);
+	public Host getHost(int vmId, int userId);
 
-	/**
-	 * Sets the host list.
-	 * 
-	 * @param hostList the new host list
-	 */
-	protected void setHostList(List<? extends Host> hostList) {
-		this.hostList = hostList;
-	}
 
 	/**
 	 * Gets the host list.
@@ -115,8 +94,6 @@ public abstract class VmAllocationPolicy {
 	 * @return the host list
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends Host> List<T> getHostList() {
-		return (List<T>) hostList;
-	}
+	public <T extends Host> List<T> getHostList();
 
 }

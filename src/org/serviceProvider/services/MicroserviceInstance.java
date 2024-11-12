@@ -63,13 +63,13 @@ public class MicroserviceInstance extends Vm {
      * @pre cloudletScheduler != null
      * @post $none
      */
-    public MicroserviceInstance(int id, int userId, double mips, int numberOfPes, int ram, long bw, long size, String vmm, CloudletScheduler cloudletScheduler
+    public MicroserviceInstance(int id, int userId, double mips, int numberOfPes, int ram, long bw, long size, String vmm
                                 ,double requestTime,
                                 int configurationType,
                                 int purchaseType,
                                 double delayInStartUp,
                                 int serviceId) {
-        super(id, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
+        super(id, userId, mips, numberOfPes, ram, bw, size, vmm);
         this.requestTime = requestTime;
         this.configurationType = configurationType;
         this.purchaseType = purchaseType;
