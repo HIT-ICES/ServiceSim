@@ -1,5 +1,4 @@
 PeList = java.import('org.cloudbus.cloudsim.lists.PeList')
-java.import('org.infrastructureProvider.entities.Pe')
 Log = java.import('org.cloudbus.cloudsim.Log')
 
 VmScheduler = {

@@ -51,7 +51,7 @@ public class BaseLuaLoader implements Closeable {
         return getL().get(name);
     }
 
-    private void exec(String func) {
+    public void exec(String func) {
         Lua L = getL();
         L.run(func);
     }
@@ -136,6 +136,9 @@ public class BaseLuaLoader implements Closeable {
     }
 
     public String getLuaCode(String fileName) {
+        if (!fileName.endsWith(".lua")) {
+            fileName += ".lua";
+        }
         if (path == null) {
             return FileUtilHelper.readFileText(FileUtilHelper.append(resourcePath, fileName));
         } else {
