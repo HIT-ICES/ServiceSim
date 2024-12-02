@@ -42,10 +42,8 @@ public class LuaImpl<T> {
         paramNames.add("o");
         if (newMethod != null) {
             Parameter[] parameters = newMethod.getParameters();
-            if (parameters.length > 0) {
-                for (int i = 1; i < parameters.length; i++) {
-                    paramNames.add(parameters[i].getName());
-                }
+            for (Parameter parameter : parameters) {
+                paramNames.add(parameter.getName());
             }
         }
         
