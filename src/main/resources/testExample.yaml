@@ -1,0 +1,728 @@
+simulation:
+  experimentId: 1
+
+devicesProvider:
+  #  type: JavaLoad
+  #  path: "org.infrastructureProvider.DevicesProviderSimple"
+  type: PureLoad
+  devices:
+    - name: "Datacenter_0"
+      type: NetworkDevice #这里的type是预留，后面仿真的监控指标变多，可能会存在NetworkDeviceWithMonitor
+      identify: "cloud"
+      level: 3
+      location: # 在这里location只根据block来区分，或者直接[-1,-1,-1]？
+        latitude: -1 # -1表示不使用这个字段
+        longitude: -1 # -1表示不使用这个字段
+        block: -1 # -1表示云
+      geoCoverage: null # 这个暂时用不到，如果使用的话是有字段的，配合location的latitude和longitude使用
+        lat_l: -1
+        lat_u: -1
+        long_l: -1
+        long_u: -1
+
+      datacenterCharacteristics:
+        arch: "x86"          # 系统架构
+        os: "Linux"          # 操作系统
+        vmm: "Xen"           # 虚拟机管理程序
+        timeZone: 10.0       # 时区
+        cost:
+          processing: 3.0    # 处理资源的成本
+          memory: 0.05       # 使用内存的成本
+          storage: 0.1       # 使用存储的成本
+          bandwidth: 0.1     # 使用带宽的成本
+
+      vmAllocationPolicy:
+        type: VmAllocationPolicySimple # 可以lua
+        path: "org.infrastructureProvider.policies.VmAllocationPolicySimple"
+        parms:
+          hosts:
+            type: JavaFunction # 可以说每台机器的配置都一样，内置函数，这样简化配置。看看有无必要，若没必要则PureLoad就行
+            path: ""
+            parms:
+              hostCount: 8
+              hostConfig:
+                ramProvisioner:
+                  type: RamProvisionerSimple # 可以lua
+                  path: "org.infrastructureProvider.policies.provisioners.RamProvisionerSimple"
+                  parms:
+                    ram: 4096
+                bwProvisioner:
+                  type: BwProvisionerSimple # 可以lua
+                  path: "org.infrastructureProvider.policies.provisioners.BwProvisionerSimple"
+                  parms:
+                    ram: 10000
+                storage: 1000000
+                vmScheduler:
+                  type: VmSchedulerSpaceShared
+                  path: "org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared"
+                  parms:
+                    pes:
+                      type: JavaFunction #看看上面定义了，这里还需要不
+                      parms:
+                        pesNum: 8
+                        peProvisioner:
+                          type: PeProvisionerSimple # 可以lua
+                          path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+                          parms:
+                            mips: 40
+
+
+    - name: "Datacenter_1"
+      type: NetworkDevice
+      identify: "router"
+      level: 2
+      location: # 在这里location只根据block来区分，或者直接[-1,-1,-1]？
+        latitude: -1 # -1表示不使用这个字段
+        longitude: -1 # -1表示不使用这个字段
+        block: 2 # -1表示云
+      geoCoverage: null # 这个暂时用不到，如果使用的话是有字段的，配合location的latitude和longitude使用
+        lat_l: -1
+        lat_u: -1
+        long_l: -1
+        long_u: -1
+
+      datacenterCharacteristics:
+        arch: "x86"          # 系统架构
+        os: "Linux"          # 操作系统
+        vmm: "Xen"           # 虚拟机管理程序
+        timeZone: 10.0       # 时区
+        cost:
+          processing: 3.0    # 处理资源的成本
+          memory: 0.05       # 使用内存的成本
+          storage: 0.1       # 使用存储的成本
+          bandwidth: 0.1     # 使用带宽的成本
+
+      vmAllocationPolicy:
+        type: VmAllocationPolicySimple # 可以lua
+        path: "org.infrastructureProvider.policies.VmAllocationPolicySimple"
+        parms:
+          hosts:
+            type: PureLoad # 完整的配置
+            hostConfig:
+              - id: 0 # id从0开始
+                ramProvisioner:
+                  type: RamProvisionerSimple # 可以lua
+                  path: "org.infrastructureProvider.policies.provisioners.RamProvisionerSimple"
+                  parms:
+                    ram: 4096
+                bwProvisioner:
+                  type: BwProvisionerSimple # 可以lua
+                  path: "org.infrastructureProvider.policies.provisioners.BwProvisionerSimple"
+                  parms:
+                    ram: 10000
+                storage: 1000000
+                vmScheduler:
+                  type: VmSchedulerSpaceShared
+                  path: "org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared"
+                  parms:
+                    pes: # peList
+                      type: PureLoad
+                      pesList:
+                        - id: 0 # id从0开始
+                          peProvisioner:
+                            type: PeProvisionerSimple # 可以JavaLoad,可以LuaBuild
+                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+                            parms:
+                              mips: 40
+                        - id: 1 # id从0开始
+                          peProvisioner:
+                            type: PeProvisionerSimple # 可以JavaLoad,可以LuaBuild
+                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+                            parms:
+                              mips: 40
+                        - id: 2 # id从0开始
+                          peProvisioner:
+                            type: PeProvisionerSimple # 可以JavaLoad,可以LuaBuild
+                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+                            parms:
+                              mips: 40
+                        - id: 3 # id从0开始
+                          peProvisioner:
+                            type: PeProvisionerSimple # 可以JavaLoad,可以LuaBuild
+                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+                            parms:
+                              mips: 40
+                        - id: 4 # id从0开始
+                          peProvisioner:
+                            type: PeProvisionerSimple # 可以JavaLoad,可以LuaBuild
+                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+                            parms:
+                              mips: 40
+                        - id: 5 # id从0开始
+                          peProvisioner:
+                            type: PeProvisionerSimple # 可以JavaLoad,可以LuaBuild
+                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+                            parms:
+                              mips: 40
+                        - id: 6 # id从0开始
+                          peProvisioner:
+                            type: JavaLoad # 可以JavaLoad,可以LuaBuild
+                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+                            parms:
+                              mips: 40
+                        - id: 7 # id从0开始
+                          peProvisioner:
+                            type: JavaLoad # 可以JavaLoad,可以LuaBuild
+                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+                            parms:
+                              mips: 40
+
+    - name: "Datacenter_2"
+      type: NetworkDevice
+      identify: "edge"
+      level: 1
+      location: # 在这里location只根据block来区分，或者直接[-1,-1,-1]？
+        latitude: -1 # -1表示不使用这个字段
+        longitude: -1 # -1表示不使用这个字段
+        block: 0 # -1表示云
+      geoCoverage: null # 这个暂时用不到，如果使用的话是有字段的，配合location的latitude和longitude使用
+        lat_l: -1
+        lat_u: -1
+        long_l: -1
+        long_u: -1
+
+      datacenterCharacteristics:
+        arch: "x86"          # 系统架构
+        os: "Linux"          # 操作系统
+        vmm: "Xen"           # 虚拟机管理程序
+        timeZone: 10.0       # 时区
+        cost:
+          processing: 3.0    # 处理资源的成本
+          memory: 0.05       # 使用内存的成本
+          storage: 0.1       # 使用存储的成本
+          bandwidth: 0.1     # 使用带宽的成本
+
+      vmAllocationPolicy:
+        type: VmAllocationPolicySimple # 可以lua
+        path: "org.infrastructureProvider.policies.VmAllocationPolicySimple"
+        parms:
+          hosts:
+            type: PureLoad # 完整的配置
+            hostConfig:
+              - id: 0 # id从0开始
+                ramProvisioner:
+                  type: RamProvisionerSimple # 可以lua
+                  path: "org.infrastructureProvider.policies.provisioners.RamProvisionerSimple"
+                  parms:
+                    ram: 4096
+                bwProvisioner:
+                  type: BwProvisionerSimple # 可以lua
+                  path: "org.infrastructureProvider.policies.provisioners.BwProvisionerSimple"
+                  parms:
+                    ram: 10000
+                storage: 1000000
+                vmScheduler:
+                  type: VmSchedulerSpaceShared
+                  path: "org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared"
+                  parms:
+                    pes:
+                      type: JavaFunction #内置了函数，因为pe都一样
+                      parms:
+                        pesNum: 8
+                        peProvisioner:
+                          type: PeProvisionerSimple # 可以lua
+                          path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+                          parms:
+                            mips: 40
+
+              - id: 1 # id从0开始
+                ramProvisioner:
+                  type: RamProvisionerSimple # 可以lua
+                  path: "org.infrastructureProvider.policies.provisioners.RamProvisionerSimple"
+                  parms:
+                    ram: 4096
+                bwProvisioner:
+                  type: BwProvisionerSimple # 可以lua
+                  path: "org.infrastructureProvider.policies.provisioners.BwProvisionerSimple"
+                  parms:
+                    ram: 10000
+                storage: 1000000
+                vmScheduler:
+                  type: VmSchedulerSpaceShared
+                  path: "org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared"
+                  parms:
+                    pes:
+                      type: JavaFunction #内置了函数，因为pe都一样
+                      parms:
+                        pesNum: 8
+                        peProvisioner:
+                          type: PeProvisionerSimple # 可以lua
+                          path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+                          parms:
+                            mips: 40
+
+    - name: "Datacenter_3"
+      type: NetworkDevice
+      identify: "edge"
+      level: 1
+      location: # 在这里location只根据block来区分，或者直接[-1,-1,-1]？
+        latitude: -1 # -1表示不使用这个字段
+        longitude: -1 # -1表示不使用这个字段
+        block: 1 # -1表示云
+      geoCoverage: null # 这个暂时用不到，如果使用的话是有字段的，配合location的latitude和longitude使用
+        lat_l: -1
+        lat_u: -1
+        long_l: -1
+        long_u: -1
+
+      datacenterCharacteristics:
+        arch: "x86"          # 系统架构
+        os: "Linux"          # 操作系统
+        vmm: "Xen"           # 虚拟机管理程序
+        timeZone: 10.0       # 时区
+        cost:
+          processing: 3.0    # 处理资源的成本
+          memory: 0.05       # 使用内存的成本
+          storage: 0.1       # 使用存储的成本
+          bandwidth: 0.1     # 使用带宽的成本
+
+      vmAllocationPolicy:
+        type: VmAllocationPolicySimple # 可以lua
+        path: "org.infrastructureProvider.policies.VmAllocationPolicySimple"
+        parms:
+          type: JavaFunction # 可以说每台机器的配置都一样，内置函数，这样简化配置。看看有无必要，若没必要则PureLoad就行
+          path: ""
+          parms:
+#            - xxx: xxx
+#            - type: ref/clone
+#              path: devicesProvider.devices[3].vmAll
+            hostCount: 2
+            hostConfig:
+              ramProvisioner:
+                type: RamProvisionerSimple # 可以lua
+                path: "org.infrastructureProvider.policies.provisioners.RamProvisionerSimple"
+                parms:
+                  ram: 4096
+              bwProvisioner:
+                type: BwProvisionerSimple # 可以lua
+                path: "org.infrastructureProvider.policies.provisioners.BwProvisionerSimple"
+                parms:
+                  ram: 10000
+              storage: 1000000
+              vmScheduler:
+                type: VmSchedulerSpaceShared
+                path: "org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared"
+                parms:
+                  pes:
+                    type: JavaFunction #看看上面定义了，这里还需要不
+                    parms:
+                      pesNum: 8
+                      peProvisioner:
+                        type: PeProvisionerSimple # 可以lua
+                        path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+                        parms:
+                          mips: 40
+
+
+  channels:
+    - source: "Datacenter_0" # 这里面每两个datacenter之间都需要有两个channel，分别代表不同的机器上传数据包的带宽和延时
+      target: "Datacenter_1"
+      bandwidth: 104857600 # 100 * 1024 * 1024
+      latency: 0.15
+      packetScheduler:
+        type: PacketSchedulerTimeShared # 可以lua
+        path: "org.infrastructureProvider.policies.PacketSchedulerTimeShared"
+
+    - source: "Datacenter_1"
+      target: "Datacenter_0"
+      bandwidth: 104857600 # 100 * 1024 * 1024
+      latency: 0.15
+      packetScheduler:
+        type: PacketSchedulerTimeShared # 可以lua
+        path: "org.infrastructureProvider.policies.PacketSchedulerTimeShared"
+
+    - source: "Datacenter_1"
+      target: "Datacenter_2"
+      bandwidth: 104857600 # 100 * 1024 * 1024
+      latency: 0.002
+      scheduler: "TimeShared"
+      packetScheduler:
+        type: PacketSchedulerTimeShared # 可以lua
+        path: "org.infrastructureProvider.policies.PacketSchedulerTimeShared"
+
+    - source: "Datacenter_2"
+      target: "Datacenter_1"
+      bandwidth: 104857600 # 100 * 1024 * 1024
+      latency: 0.002
+      scheduler: "TimeShared"
+      packetScheduler:
+        type: PacketSchedulerTimeShared # 可以lua
+        path: "org.infrastructureProvider.policies.PacketSchedulerTimeShared"
+
+    - source: "Datacenter_1"
+      target: "Datacenter_3"
+      bandwidth: 104857600 # 100 * 1024 * 1024
+      latency: 0.002
+      packetScheduler:
+        type: PacketSchedulerTimeShared # 可以lua
+        path: "org.infrastructureProvider.policies.PacketSchedulerTimeShared"
+
+    - source: "Datacenter_3"
+      target: "Datacenter_1"
+      bandwidth: 104857600 # 100 * 1024 * 1024
+      latency: 0.002
+      packetScheduler:
+        type: PacketSchedulerTimeShared # 可以lua
+        path: "org.infrastructureProvider.policies.PacketSchedulerTimeShared"
+
+
+serviceProvider: # 暂时先不支持多个service provider吧，我们的重点是观察服务提供商的策略
+  type: ServiceProvider # 这里的type是预留，后面仿真的监控指标变多，可能会存在NetworkDeviceWithMonitor
+  name: "serviceProvider"
+  serviceChains:
+#    type: JavaFunction
+#    path: ""
+#    parms:
+#      microservices: [0, 1, 2, 3]
+#      cloudletLength: [0, 0.4, 0.4, 0.4]
+#      pesNumber: [1, 1, 1, 1]
+#      memory: [1, 1, 1, 1]
+#      a: 0.2
+#      data: 1000
+#      scList:
+#        - id: 0
+#          serviceRelationship:
+#            - svcId: 0
+#              followSvcs: [1]
+#            - svcId: 1
+#              followSvcs: [2,3]
+#        - id: 1
+#          serviceRelationship:
+#            - svcId: 0
+#              followSvcs: [4]
+#            - svcId: 4
+#              followSvcs: [3]
+#            - svcId: 3
+#              followSvcs: [5]
+
+    type: PureLoad
+    scList:
+      - id: 0
+        microservices: [0, 1, 2, 3]
+        cloudletLength: [0, 0.4, 0.4, 0.4]
+        pesNumber: [1, 1, 1, 1]
+        memory: [10, 100, 100, 100]
+        serviceStages:
+          - serviceId: 0 # 每个服务+前置服务确定一个服务对应任务的stages
+            previousScId: -1
+            stages:
+              - type: WAIT_SEND
+                stageOrder: 0
+                peer: 1
+                stageCloudletLength: 0
+                data: 1000
+              - type: WAIT_RECV
+                stageOrder: 0
+                peer: 1
+                stageCloudletLength: 0
+                data: 1000
+          - serviceId: 1
+            previousScId: 0
+            stages:
+              - type: EXECUTION
+                stageOrder: 0
+                peer: 1
+                stageCloudletLength: 0.2
+                data: 0
+              - type: WAIT_SEND
+                stageOrder: 1
+                peer: 2
+                stageCloudletLength: 0
+                data: 1000
+              - type: WAIT_SEND
+                stageOrder: 2
+                peer: 3
+                stageCloudletLength: 0
+                data: 1000
+              - type: WAIT_RECV
+                stageOrder: 3
+                peer: 2
+                stageCloudletLength: 0
+                data: 1000
+              - type: WAIT_RECV
+                stageOrder: 4
+                peer: 3
+                stageCloudletLength: 0
+                data: 1000
+              - type: EXECUTION
+                stageOrder: 5
+                peer: 1
+                stageCloudletLength: 0.2
+                data: 0
+              - type: WAIT_SEND
+                stageOrder: 6
+                peer: 0
+                stageCloudletLength: 0
+                data: 1000
+          - serviceId: 2
+            previousScId: 1
+            stages:
+              - type: EXECUTION
+                stageOrder: 0
+                peer: 2
+                stageCloudletLength: 0.4
+                data: 0
+              - type: WAIT_SEND
+                stageOrder: 1
+                peer: 1
+                stageCloudletLength: 0
+                data: 1000
+          - serviceId: 3
+            previousScId: 1
+            stages:
+              - type: EXECUTION
+                stageOrder: 0
+                peer: 3
+                stageCloudletLength: 0.4
+                data: 0
+              - type: WAIT_SEND
+                stageOrder: 1
+                peer: 1
+                stageCloudletLength: 0
+                data: 1000
+      - id: 1
+        microservices: [0, 4, 3, 5]
+        cloudletLength: [0, 0.4, 0.4, 0.4]
+        pesNumber: [1, 1, 1, 1]
+        memory: [10, 100, 100, 100]
+        serviceStages:
+          - serviceId: 0
+            previousScId: -1
+            stages:
+              - type: WAIT_SEND
+                stageOrder: 0
+                peer: 4
+                stageCloudletLength: 0
+                data: 1000
+              - type: WAIT_RECV
+                stageOrder: 1
+                peer: 4
+                stageCloudletLength: 0
+                data: 1000
+          - serviceId: 4
+            previousScId: 0
+            stages:
+              - type: EXECUTION
+                stageOrder: 0
+                peer: 4
+                stageCloudletLength: 0.2
+                data: 0
+              - type: WAIT_SEND
+                stageOrder: 1
+                peer: 3
+                stageCloudletLength: 0
+                data: 1000
+              - type: WAIT_RECV
+                stageOrder: 2
+                peer: 3
+                stageCloudletLength: 0
+                data: 1000
+              - type: EXECUTION
+                stageOrder: 3
+                peer: 4
+                stageCloudletLength: 0.2
+                data: 0
+              - type: WAIT_SEND
+                stageOrder: 4
+                peer: 0
+                stageCloudletLength: 0
+                data: 1000
+          - serviceId: 3
+            previousScId: 4
+            stages:
+              - type: EXECUTION
+                stageOrder: 0
+                peer: 3
+                stageCloudletLength: 0.2
+                data: 0
+              - type: WAIT_SEND
+                stageOrder: 1
+                peer: 5
+                stageCloudletLength: 0
+                data: 1000
+              - type: WAIT_RECV
+                stageOrder: 2
+                peer: 5
+                stageCloudletLength: 0
+                data: 1000
+              - type: EXECUTION
+                stageOrder: 3
+                peer: 3
+                stageCloudletLength: 0.2
+                data: 0
+              - type: WAIT_SEND
+                stageOrder: 4
+                peer: 4
+                stageCloudletLength: 0
+                data: 1000
+          - serviceId: 5
+            previousScId: 3
+            stages:
+              - type: EXECUTION
+                stageOrder: 0
+                peer: 5
+                stageCloudletLength: 0.4
+                data: 0
+              - type: WAIT_SEND
+                stageOrder: 1
+                peer: 3
+                stageCloudletLength: 0
+                data: 1000
+
+  loadAdmission:
+    - type: NonLoadAdmission #JavaLoad lua
+      path: "org.serviceProvider.capacities.NonLoadAdmission"
+      targetDevices: ["Datacenter_0", "Datacenter_1", "Datacenter_2", "Datacenter_3"]
+#    - device: "Datacenter_0"
+#      type: NonLoadAdmission
+#      path: "org.serviceProvider.capacities.NonLoadAdmission"
+#    - device: "Datacenter_1"
+#      type: NonLoadAdmission
+#      path: "org.serviceProvider.capacities.NonLoadAdmission"
+#    - device: "Datacenter_2"
+#      type: NonLoadAdmission
+#      path: "org.serviceProvider.capacities.NonLoadAdmission"
+#    - device: "Datacenter_3"
+#      type: NonLoadAdmission
+#      path: "org.serviceProvider.capacities.NonLoadAdmission"
+
+  loadBalance:
+    - type: RoundRobin # JavaLoad lua
+      path: "org.serviceProvider.capacities.RoundRobin"
+      targetDevices: ["Datacenter_0", "Datacenter_1", "Datacenter_2", "Datacenter_3"]
+  #    - device: "Datacenter_0"
+  #      type: RoundRobin
+  #      path: "org.serviceProvider.capacities.RoundRobin"
+  #    - device: "Datacenter_1"
+  #      type: RoundRobin
+  #      path: "org.serviceProvider.capacities.RoundRobin"
+  #    - device: "Datacenter_2"
+  #      type: RoundRobin
+  #      path: "org.serviceProvider.capacities.RoundRobin"
+  #    - device: "Datacenter_3"
+  #      type: RoundRobin
+  #      path: "org.serviceProvider.capacities.RoundRobin"
+
+  requestDispatching:
+    - device: "Datacenter_0"
+      type: RequestDispatchingSimple
+      path: "org.serviceProvider.capacities.RequestDispatchingSimple"
+      dispatchRange: ["Datacenter_0", "Datacenter_1"]
+    - device: "Datacenter_1"
+      type: RequestDispatchingSimple
+      path: "org.serviceProvider.capacities.RequestDispatchingSimple"
+      dispatchRange: ["Datacenter_1"]
+    - device: "Datacenter_2"
+      type: RequestDispatchingSimple
+      path: "org.serviceProvider.capacities.RequestDispatchingSimple"
+      dispatchRange: ["Datacenter_2"]
+    - device: "Datacenter_3"
+      type: RequestDispatchingSimple
+      path: "org.serviceProvider.capacities.RequestDispatchingSimple"
+      dispatchRange: ["Datacenter_3"]
+
+
+  initInstance:
+    - device: "Datacenter_0"
+      serviceToNum:
+        - serviceId: 0
+          typeToNum:
+            - typeId: 0
+              num: 1
+        - serviceId: 1
+          typeToNum:
+            - typeId: 0
+              num: 2
+        - serviceId: 2
+          typeToNum:
+            - typeId: 0
+              num: 2
+        - serviceId: 3
+          typeToNum:
+            - typeId: 0
+              num: 4
+        - serviceId: 4
+          typeToNum:
+            - typeId: 0
+              num: 2
+        - serviceId: 5
+          typeToNum:
+            - typeId: 0
+              num: 2
+    - device: "Datacenter_1"
+      serviceToNum:
+        - serviceId: 0
+          typeToNum:
+            - typeId: 0
+              num: 1
+    - device: "Datacenter_2"
+      serviceToNum:
+        - serviceId: 0
+          typeToNum:
+            - typeId: 0
+              num: 1
+        - serviceId: 1
+          typeToNum:
+            - typeId: 0
+              num: 2
+        - serviceId: 2
+          typeToNum:
+            - typeId: 0
+              num: 2
+        - serviceId: 3
+          typeToNum:
+            - typeId: 0
+              num: 4
+        - serviceId: 4
+          typeToNum:
+            - typeId: 0
+              num: 2
+        - serviceId: 5
+          typeToNum:
+            - typeId: 0
+              num: 2
+    - device: "Datacenter_3"
+      serviceToNum:
+        - serviceId: 0
+          typeToNum:
+            - typeId: 0
+              num: 1
+        - serviceId: 1
+          typeToNum:
+            - typeId: 0
+              num: 2
+        - serviceId: 2
+          typeToNum:
+            - typeId: 0
+              num: 2
+        - serviceId: 3
+          typeToNum:
+            - typeId: 0
+              num: 4
+        - serviceId: 4
+          typeToNum:
+            - typeId: 0
+              num: 2
+        - serviceId: 5
+          typeToNum:
+            - typeId: 0
+              num: 2
+
+  outputFiles:
+    workloadResult: "src/others/results/workloadResult1.csv" # 设定一个路径，文件名和实验的experimentId: 1相关
+    cloudletExeDetail: "src/others/results/cloudletExeDetail1.csv"
+    cloudletStageDetail: "src/others/results/cloudletStagesDetail1.csv"
+
+endUser:
+  type: JavaLoad # lua
+  path: "org.enduser.EndUser"
+  parms:
+    name: "endUser"
+    flag: 0 # 标识是哪个方法
+    limit: 60 # 60s
+    endUserSimFile: "workloadTest1.csv"
+
+
+
+
+
