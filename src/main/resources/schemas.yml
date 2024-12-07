@@ -1,0 +1,33 @@
+- id: java_code
+  type: java
+  ref: class xxx
+  args: 
+  - ...
+- id: lua_code
+  type: lua
+  impl: |
+    ...
+  args:
+  - ...
+- id: vmAllocationPolicySimple
+  type: conf
+  spec:
+    - type: replica
+      count: 10
+      template:
+      - id: "builtin:org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+        params:
+          mips: 40
+
+NetworkDevice:
+  - type: list
+    value:
+      - id: "builtin:org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+      params:
+        mips: 40
+
+    id: "user:/user-id/xxx.lua"
+
+
+ vmAllocationPolicy interface
+  vmAllocationPolicySimple

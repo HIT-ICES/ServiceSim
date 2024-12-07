@@ -2,44 +2,214 @@ simulation:
   experimentId: 1
 
 devicesProvider:
-  #  type: JavaLoad
-  #  path: "org.infrastructureProvider.DevicesProviderSimple"
-  type: PureLoad
-  devices:
-    - name: "Datacenter_0"
-      type: NetworkDevice #这里的type是预留，后面仿真的监控指标变多，可能会存在NetworkDeviceWithMonitor
-      identify: "cloud"
-      level: 3
-      location: # 在这里location只根据block来区分，或者直接[-1,-1,-1]？
-        latitude: -1 # -1表示不使用这个字段
-        longitude: -1 # -1表示不使用这个字段
-        block: -1 # -1表示云
-      geoCoverage: null # 这个暂时用不到，如果使用的话是有字段的，配合location的latitude和longitude使用
-        lat_l: -1
-        lat_u: -1
-        long_l: -1
-        long_u: -1
+  type: builtin
+  path: 'org.infrastructureProvider.DevicesProviderSimple'
+  args:
+    - name: devices # 需要注意的是，这里的每个对象，尽管实现方式不同，都应该【实现】确定的接口，type只是指定了实现方式
+      value:
+      # type: template # 可重复的模板
+      # replica: 10
+      # spec: 
+      #  type: inline # 是的，这里仍然可以引用其他东西
+      #  spec: ...
 
-      datacenterCharacteristics:
-        arch: "x86"          # 系统架构
-        os: "Linux"          # 操作系统
-        vmm: "Xen"           # 虚拟机管理程序
-        timeZone: 10.0       # 时区
-        cost:
-          processing: 3.0    # 处理资源的成本
-          memory: 0.05       # 使用内存的成本
-          storage: 0.1       # 使用存储的成本
-          bandwidth: 0.1     # 使用带宽的成本
+      # type: script # 内联lua脚本
+      # spec: |
+      #   {/* Lua Script Here*/}
+      
+      # type: builtin # 内置java对象
+      # path: "org.infrastructureProvider.DevicesProviderSimple"
+      # args: 
+      # - name: argName
+      #   value:
+      #   - type: #template, builtin, script (内联lua脚本), resource
+      #     xx: ...
 
-      vmAllocationPolicy:
-        type: VmAllocationPolicySimple # 可以lua
-        path: "org.infrastructureProvider.policies.VmAllocationPolicySimple"
-        parms:
-          hosts:
+      # type: resource # 引用用户的资源，是写好的lua脚本或者其他配置
+      # user: user-id
+      # path: "src/others/results/workloadResult1.csv"
+
+      # type: reference # 【备选模式】 引用同一文档里的值，同一实例
+      # path: $.devicesProvider.path
+
+      # type: clone # 【备选模式】 引用同一文档里的值，克隆实例
+      # path: $.devicesProvider.path
+
+        type: inline # 内联的实现，意味着这串YAML可以直接被实例化成Java Record这里通过手动列表来注入List<T>的内容
+        spec:
+        - type: inline
+          spec:
+            name: "Datacenter_0" # 基本类型：数字，布尔，字符串，以及他们的列表/数组，强制以inline方式完成，后面可以考虑宏支持，引用文档里的值
+            identify: "cloud"
+            level: 3
+            location: [-1,-1,-1] # 在这里location只根据block来区分，或者直接[-1,-1,-1]？ @FerdinandSu: 这玩意其实是个Json Array
+              # latitude: -1 # -1表示不使用这个字段
+              # longitude: -1 # -1表示不使用这个字段
+              # block: -1 # -1表示云
+            geoCoverage: [-1, -1,-1,-1] # null # 这个暂时用不到，如果使用的话是有字段的，配合location的latitude和longitude使用
+              # lat_l: -1
+              # lat_u: -1
+              # long_l: -1
+              # long_u: -1
+
+            datacenterCharacteristics:
+              arch: "x86"          # 系统架构
+              os: "Linux"          # 操作系统
+              vmm: "Xen"           # 虚拟机管理程序
+              timeZone: 10.0       # 时区
+              cost:
+                processing: 3.0    # 处理资源的成本
+                memory: 0.05       # 使用内存的成本
+                storage: 0.1       # 使用存储的成本
+                bandwidth: 0.1     # 使用带宽的成本
+            vmAllocationPolicy:
+              type: resource
+              user: fers
+              path: /example/vmAllocationPolicy.yaml # 位于文件末尾
+        - type: inline
+          spec:
+            name: "Datacenter_1"
+            type: NetworkDevice
+            identify: "router"
+            level: 2
+            location: [-1,-1,2]
+            geoCoverage: [-1, -1,-1,-1]
+            datacenterCharacteristics:
+              arch: "x86"          # 系统架构
+              os: "Linux"          # 操作系统
+              vmm: "Xen"           # 虚拟机管理程序
+              timeZone: 10.0       # 时区
+              cost:
+                processing: 3.0    # 处理资源的成本
+                memory: 0.05       # 使用内存的成本
+                storage: 0.1       # 使用存储的成本
+                bandwidth: 0.1     # 使用带宽的成本
+
+            vmAllocationPolicy:
+              type: clone
+              path: $.devicesProvider.args[0].value[0].spec[0].spec.vmAllocationPolicy # 引用上一个
+          
+
+      - name: "Datacenter_2"
+        type: NetworkDevice
+        identify: "edge"
+        level: 1
+        location: # 在这里location只根据block来区分，或者直接[-1,-1,-1]？
+          latitude: -1 # -1表示不使用这个字段
+          longitude: -1 # -1表示不使用这个字段
+          block: 0 # -1表示云
+        geoCoverage: null # 这个暂时用不到，如果使用的话是有字段的，配合location的latitude和longitude使用
+          lat_l: -1
+          lat_u: -1
+          long_l: -1
+          long_u: -1
+
+        datacenterCharacteristics:
+          arch: "x86"          # 系统架构
+          os: "Linux"          # 操作系统
+          vmm: "Xen"           # 虚拟机管理程序
+          timeZone: 10.0       # 时区
+          cost:
+            processing: 3.0    # 处理资源的成本
+            memory: 0.05       # 使用内存的成本
+            storage: 0.1       # 使用存储的成本
+            bandwidth: 0.1     # 使用带宽的成本
+
+        vmAllocationPolicy:
+          type: VmAllocationPolicySimple # 可以lua
+          path: "org.infrastructureProvider.policies.VmAllocationPolicySimple"
+          parms:
+            hosts:
+              type: PureLoad # 完整的配置
+              hostConfig:
+                - id: 0 # id从0开始
+                  ramProvisioner:
+                    type: RamProvisionerSimple # 可以lua
+                    path: "org.infrastructureProvider.policies.provisioners.RamProvisionerSimple"
+                    parms:
+                      ram: 4096
+                  bwProvisioner:
+                    type: BwProvisionerSimple # 可以lua
+                    path: "org.infrastructureProvider.policies.provisioners.BwProvisionerSimple"
+                    parms:
+                      ram: 10000
+                  storage: 1000000
+                  vmScheduler:
+                    type: VmSchedulerSpaceShared
+                    path: "org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared"
+                    parms:
+                      pes:
+                        type: JavaFunction #内置了函数，因为pe都一样
+                        parms:
+                          pesNum: 8
+                          peProvisioner:
+                            type: PeProvisionerSimple # 可以lua
+                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+                            parms:
+                              mips: 40
+
+                - id: 1 # id从0开始
+                  ramProvisioner:
+                    type: RamProvisionerSimple # 可以lua
+                    path: "org.infrastructureProvider.policies.provisioners.RamProvisionerSimple"
+                    parms:
+                      ram: 4096
+                  bwProvisioner:
+                    type: BwProvisionerSimple # 可以lua
+                    path: "org.infrastructureProvider.policies.provisioners.BwProvisionerSimple"
+                    parms:
+                      ram: 10000
+                  storage: 1000000
+                  vmScheduler:
+                    type: VmSchedulerSpaceShared
+                    path: "org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared"
+                    parms:
+                      pes:
+                        type: JavaFunction #内置了函数，因为pe都一样
+                        parms:
+                          pesNum: 8
+                          peProvisioner:
+                            type: PeProvisionerSimple # 可以lua
+                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+                            parms:
+                              mips: 40
+
+      - name: "Datacenter_3"
+        type: NetworkDevice
+        identify: "edge"
+        level: 1
+        location: # 在这里location只根据block来区分，或者直接[-1,-1,-1]？
+          latitude: -1 # -1表示不使用这个字段
+          longitude: -1 # -1表示不使用这个字段
+          block: 1 # -1表示云
+        geoCoverage: null # 这个暂时用不到，如果使用的话是有字段的，配合location的latitude和longitude使用
+          lat_l: -1
+          lat_u: -1
+          long_l: -1
+          long_u: -1
+
+        datacenterCharacteristics:
+          arch: "x86"          # 系统架构
+          os: "Linux"          # 操作系统
+          vmm: "Xen"           # 虚拟机管理程序
+          timeZone: 10.0       # 时区
+          cost:
+            processing: 3.0    # 处理资源的成本
+            memory: 0.05       # 使用内存的成本
+            storage: 0.1       # 使用存储的成本
+            bandwidth: 0.1     # 使用带宽的成本
+
+        vmAllocationPolicy:
+          type: VmAllocationPolicySimple # 可以lua
+          path: "org.infrastructureProvider.policies.VmAllocationPolicySimple"
+          parms:
             type: JavaFunction # 可以说每台机器的配置都一样，内置函数，这样简化配置。看看有无必要，若没必要则PureLoad就行
             path: ""
             parms:
-              hostCount: 8
+  #            - xxx: xxx
+  #            - type: ref/clone
+  #              path: devicesProvider.devices[3].vmAll
+              hostCount: 2
               hostConfig:
                 ramProvisioner:
                   type: RamProvisionerSimple # 可以lua
@@ -52,6 +222,7 @@ devicesProvider:
                   parms:
                     ram: 10000
                 storage: 1000000
+
                 vmScheduler:
                   type: VmSchedulerSpaceShared
                   path: "org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared"
@@ -65,253 +236,6 @@ devicesProvider:
                           path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
                           parms:
                             mips: 40
-
-
-    - name: "Datacenter_1"
-      type: NetworkDevice
-      identify: "router"
-      level: 2
-      location: # 在这里location只根据block来区分，或者直接[-1,-1,-1]？
-        latitude: -1 # -1表示不使用这个字段
-        longitude: -1 # -1表示不使用这个字段
-        block: 2 # -1表示云
-      geoCoverage: null # 这个暂时用不到，如果使用的话是有字段的，配合location的latitude和longitude使用
-        lat_l: -1
-        lat_u: -1
-        long_l: -1
-        long_u: -1
-
-      datacenterCharacteristics:
-        arch: "x86"          # 系统架构
-        os: "Linux"          # 操作系统
-        vmm: "Xen"           # 虚拟机管理程序
-        timeZone: 10.0       # 时区
-        cost:
-          processing: 3.0    # 处理资源的成本
-          memory: 0.05       # 使用内存的成本
-          storage: 0.1       # 使用存储的成本
-          bandwidth: 0.1     # 使用带宽的成本
-
-      vmAllocationPolicy:
-        type: VmAllocationPolicySimple # 可以lua
-        path: "org.infrastructureProvider.policies.VmAllocationPolicySimple"
-        parms:
-          hosts:
-            type: PureLoad # 完整的配置
-            hostConfig:
-              - id: 0 # id从0开始
-                ramProvisioner:
-                  type: RamProvisionerSimple # 可以lua
-                  path: "org.infrastructureProvider.policies.provisioners.RamProvisionerSimple"
-                  parms:
-                    ram: 4096
-                bwProvisioner:
-                  type: BwProvisionerSimple # 可以lua
-                  path: "org.infrastructureProvider.policies.provisioners.BwProvisionerSimple"
-                  parms:
-                    ram: 10000
-                storage: 1000000
-                vmScheduler:
-                  type: VmSchedulerSpaceShared
-                  path: "org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared"
-                  parms:
-                    pes: # peList
-                      type: PureLoad
-                      pesList:
-                        - id: 0 # id从0开始
-                          peProvisioner:
-                            type: PeProvisionerSimple # 可以JavaLoad,可以LuaBuild
-                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
-                            parms:
-                              mips: 40
-                        - id: 1 # id从0开始
-                          peProvisioner:
-                            type: PeProvisionerSimple # 可以JavaLoad,可以LuaBuild
-                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
-                            parms:
-                              mips: 40
-                        - id: 2 # id从0开始
-                          peProvisioner:
-                            type: PeProvisionerSimple # 可以JavaLoad,可以LuaBuild
-                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
-                            parms:
-                              mips: 40
-                        - id: 3 # id从0开始
-                          peProvisioner:
-                            type: PeProvisionerSimple # 可以JavaLoad,可以LuaBuild
-                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
-                            parms:
-                              mips: 40
-                        - id: 4 # id从0开始
-                          peProvisioner:
-                            type: PeProvisionerSimple # 可以JavaLoad,可以LuaBuild
-                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
-                            parms:
-                              mips: 40
-                        - id: 5 # id从0开始
-                          peProvisioner:
-                            type: PeProvisionerSimple # 可以JavaLoad,可以LuaBuild
-                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
-                            parms:
-                              mips: 40
-                        - id: 6 # id从0开始
-                          peProvisioner:
-                            type: JavaLoad # 可以JavaLoad,可以LuaBuild
-                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
-                            parms:
-                              mips: 40
-                        - id: 7 # id从0开始
-                          peProvisioner:
-                            type: JavaLoad # 可以JavaLoad,可以LuaBuild
-                            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
-                            parms:
-                              mips: 40
-
-    - name: "Datacenter_2"
-      type: NetworkDevice
-      identify: "edge"
-      level: 1
-      location: # 在这里location只根据block来区分，或者直接[-1,-1,-1]？
-        latitude: -1 # -1表示不使用这个字段
-        longitude: -1 # -1表示不使用这个字段
-        block: 0 # -1表示云
-      geoCoverage: null # 这个暂时用不到，如果使用的话是有字段的，配合location的latitude和longitude使用
-        lat_l: -1
-        lat_u: -1
-        long_l: -1
-        long_u: -1
-
-      datacenterCharacteristics:
-        arch: "x86"          # 系统架构
-        os: "Linux"          # 操作系统
-        vmm: "Xen"           # 虚拟机管理程序
-        timeZone: 10.0       # 时区
-        cost:
-          processing: 3.0    # 处理资源的成本
-          memory: 0.05       # 使用内存的成本
-          storage: 0.1       # 使用存储的成本
-          bandwidth: 0.1     # 使用带宽的成本
-
-      vmAllocationPolicy:
-        type: VmAllocationPolicySimple # 可以lua
-        path: "org.infrastructureProvider.policies.VmAllocationPolicySimple"
-        parms:
-          hosts:
-            type: PureLoad # 完整的配置
-            hostConfig:
-              - id: 0 # id从0开始
-                ramProvisioner:
-                  type: RamProvisionerSimple # 可以lua
-                  path: "org.infrastructureProvider.policies.provisioners.RamProvisionerSimple"
-                  parms:
-                    ram: 4096
-                bwProvisioner:
-                  type: BwProvisionerSimple # 可以lua
-                  path: "org.infrastructureProvider.policies.provisioners.BwProvisionerSimple"
-                  parms:
-                    ram: 10000
-                storage: 1000000
-                vmScheduler:
-                  type: VmSchedulerSpaceShared
-                  path: "org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared"
-                  parms:
-                    pes:
-                      type: JavaFunction #内置了函数，因为pe都一样
-                      parms:
-                        pesNum: 8
-                        peProvisioner:
-                          type: PeProvisionerSimple # 可以lua
-                          path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
-                          parms:
-                            mips: 40
-
-              - id: 1 # id从0开始
-                ramProvisioner:
-                  type: RamProvisionerSimple # 可以lua
-                  path: "org.infrastructureProvider.policies.provisioners.RamProvisionerSimple"
-                  parms:
-                    ram: 4096
-                bwProvisioner:
-                  type: BwProvisionerSimple # 可以lua
-                  path: "org.infrastructureProvider.policies.provisioners.BwProvisionerSimple"
-                  parms:
-                    ram: 10000
-                storage: 1000000
-                vmScheduler:
-                  type: VmSchedulerSpaceShared
-                  path: "org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared"
-                  parms:
-                    pes:
-                      type: JavaFunction #内置了函数，因为pe都一样
-                      parms:
-                        pesNum: 8
-                        peProvisioner:
-                          type: PeProvisionerSimple # 可以lua
-                          path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
-                          parms:
-                            mips: 40
-
-    - name: "Datacenter_3"
-      type: NetworkDevice
-      identify: "edge"
-      level: 1
-      location: # 在这里location只根据block来区分，或者直接[-1,-1,-1]？
-        latitude: -1 # -1表示不使用这个字段
-        longitude: -1 # -1表示不使用这个字段
-        block: 1 # -1表示云
-      geoCoverage: null # 这个暂时用不到，如果使用的话是有字段的，配合location的latitude和longitude使用
-        lat_l: -1
-        lat_u: -1
-        long_l: -1
-        long_u: -1
-
-      datacenterCharacteristics:
-        arch: "x86"          # 系统架构
-        os: "Linux"          # 操作系统
-        vmm: "Xen"           # 虚拟机管理程序
-        timeZone: 10.0       # 时区
-        cost:
-          processing: 3.0    # 处理资源的成本
-          memory: 0.05       # 使用内存的成本
-          storage: 0.1       # 使用存储的成本
-          bandwidth: 0.1     # 使用带宽的成本
-
-      vmAllocationPolicy:
-        type: VmAllocationPolicySimple # 可以lua
-        path: "org.infrastructureProvider.policies.VmAllocationPolicySimple"
-        parms:
-          type: JavaFunction # 可以说每台机器的配置都一样，内置函数，这样简化配置。看看有无必要，若没必要则PureLoad就行
-          path: ""
-          parms:
-#            - xxx: xxx
-#            - type: ref/clone
-#              path: devicesProvider.devices[3].vmAll
-            hostCount: 2
-            hostConfig:
-              ramProvisioner:
-                type: RamProvisionerSimple # 可以lua
-                path: "org.infrastructureProvider.policies.provisioners.RamProvisionerSimple"
-                parms:
-                  ram: 4096
-              bwProvisioner:
-                type: BwProvisionerSimple # 可以lua
-                path: "org.infrastructureProvider.policies.provisioners.BwProvisionerSimple"
-                parms:
-                  ram: 10000
-              storage: 1000000
-              vmScheduler:
-                type: VmSchedulerSpaceShared
-                path: "org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared"
-                parms:
-                  pes:
-                    type: JavaFunction #看看上面定义了，这里还需要不
-                    parms:
-                      pesNum: 8
-                      peProvisioner:
-                        type: PeProvisionerSimple # 可以lua
-                        path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
-                        parms:
-                          mips: 40
 
 
   channels:
@@ -721,7 +645,43 @@ endUser:
     flag: 0 # 标识是哪个方法
     limit: 60 # 60s
     endUserSimFile: "workloadTest1.csv"
+---
+# /example/vmAllocationPolicy.yaml
 
+type: builtin
+path: "org.infrastructureProvider.policies.VmAllocationPolicySimple"
+parms:
+  - name: hosts
+    value:
+      type: template
+      replica: 8
+      spec:
+        type: inline
+        spec:
+          ramProvisioner:
+            type: builtin
+            path: "org.infrastructureProvider.policies.provisioners.RamProvisionerSimple"
+            parms:
+              - name: ram
+                value: 4096
+          bwProvisioner: 
+            type: inline # 简写，我们对常用的这种东西提供可使用Record初始化的默认实现，用户inline -> record -> BwProvisionerSimple
+            spec:
+              ram: 10000
+          storage: 1000000 #
+          vmScheduler: # @FerdinandSu: 这些没改
+            type: VmSchedulerSpaceShared
+            path: "org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared"
+            parms:
+              pes:
+                type: JavaFunction #看看上面定义了，这里还需要不
+                parms:
+                  pesNum: 8
+                  peProvisioner:
+                    type: PeProvisionerSimple # 可以lua
+                    path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+                    parms:
+                      mips: 40
 
 
 
