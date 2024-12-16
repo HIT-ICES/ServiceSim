@@ -24,7 +24,6 @@ public class DevicesProviderSimple extends DevicesProvider {
 
     public DevicesProviderSimple() {
         super();
-        createDevices();
     }
 
     @Override

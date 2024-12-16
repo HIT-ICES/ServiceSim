@@ -1,0 +1,226 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://raw.githubusercontent.com/HIT-ICES/ServiceSim/refs/heads/lua/src/main/resources/config/schemas/basic.json",
+    "$comment": "This is the providers json schema of what a configuration of simulation must contains",
+    "type": "array",
+    "description": "服务供应者列表",
+    "items": {
+        "type": "object",
+        "properties": {
+            "name": {
+                "$ref": "#/$defs/name"
+            },
+            "class": {
+                "type": "string",
+                "enum": ["device", "service"],
+                "description": "服务提供者的类型"
+            },
+            "provider": {
+                "$ref": "#/$defs/template"
+            }
+        },
+        "required": ["name", "class", "provider"]
+    },
+    "$defs": {
+        "name": {
+            "type": "string",
+            "description": "名称"
+        },
+        "type": {
+            "type": "string",
+            "enum": [
+                "template",
+                "script",
+                "builtin",
+                "resource",
+                "refrence",
+                "clone",
+                "inline"
+            ],
+            "description": "服务提供者的声明, template: 模板, script: lua脚本, builtin: java内置, resource: 用户资源, refrence: 引用（同一资源的引用）, clone: 克隆（同一资源的克隆）"
+        },
+        "args": {
+            "type": "array",
+            "description": "服务提供者的参数",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "$ref": "#/$defs/name",
+                        "description": "参数名"
+                    },
+                    "value": {
+                        "$ref": "#/$defs/template",
+                        "description": "参数值"
+                    }
+                },
+                "required": ["name", "value"]
+            }
+        },
+        "template": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/name"
+                },
+                "type": {
+                    "$ref": "#/$defs/type"
+                }
+            },
+            "required": ["type"],
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "type": {
+                                "const": "template"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "replica": {
+                                "type": "integer",
+                                "description": "服务提供者的副本数"
+                            },
+                            "spec": {
+                                "type": "array",
+                                "description": "服务提供者的规格",
+                                "items": {
+                                    "$ref": "#/$defs/template"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "type": {
+                                "const": "script"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "script": {
+                                "type": "string",
+                                "description": "服务提供者的脚本"
+                            },
+                            "args": {
+                                "$ref": "#/$defs/args",
+                                "description": "服务提供者的初始化参数"
+                            },
+                            "params": {
+                                "$ref": "#/$defs/args",
+                                "description": "服务提供者的内部属性"
+                            }
+                        }
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "type": {
+                                "const": "builtin"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "description": "服务提供者的classpath"
+                            },
+                            "args": {
+                                "$ref": "#/$defs/args",
+                                "description": "服务提供者的初始化参数"
+                            },
+                            "params": {
+                                "$ref": "#/$defs/args",
+                                "description": "服务提供者的内部属性"
+                            }
+                        }
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "type": {
+                                "const": "resource"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "user": {
+                                "type": "string",
+                                "description": "服务提供者的用户id"
+                            },
+                            "path": {
+                                "type": "string",
+                                "description": "服务提供者的资源路径"
+                            }
+                        }
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "type": {
+                                "const": "refrence"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "description": "服务提供者的引用路径, 例如: $.providers[0]",
+                                "pattern": "^\\$\\.providers\\[\\d+\\]$"
+                            }
+                        }
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "type": {
+                                "const": "clone"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "description": "服务提供者的克隆路径, 例如: $.providers[0]",
+                                "pattern": "^\\$\\.providers\\[\\d+\\]$"
+                            }
+                        }
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "type": {
+                                "const": "inline"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "spec": {
+                                "type": "array",
+                                "description": "服务提供者的规格",
+                                "items": {
+                                    "$ref": "#/$defs/template"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

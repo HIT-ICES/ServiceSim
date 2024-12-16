@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public abstract class DevicesProvider {
+public abstract class DevicesProvider implements DeviceProviderInterface {
 
     private List<? extends NetworkDevice> devices;
 
     private Map<Integer, Map<Integer, Integer>> routingTable; // now deviceId -> destination deviceId, next deviceId
+
+    public void init() {}
 
     public DevicesProvider() {
 
@@ -29,7 +31,7 @@ public abstract class DevicesProvider {
         return (List<T>) devices;
     }
 
-    protected <T extends NetworkDevice> void setDevices(List<T> devices) {
+    public <T extends NetworkDevice> void setDevices(List<T> devices) {
         this.devices = devices;
     }
 

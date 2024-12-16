@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://raw.githubusercontent.com/HIT-ICES/ServiceSim/refs/heads/lua/src/main/resources/config/schemas/global.json",
+    "$comment": "This is the global json schema of what a configuration of simulation must contains",
+    "type": "object",
+    "description": "服务模拟器的全局配置",
+    "properties": {
+        "basic": {
+            "$ref": "/HIT-ICES/ServiceSim/refs/heads/lua/src/main/resources/config/schemas/basic.json",
+            "description": "服务模拟器的基本配置, 例如id, name等"
+        },
+        "providers": {
+            "$ref": "/HIT-ICES/ServiceSim/refs/heads/lua/src/main/resources/config/schemas/providers.json",
+            "description": "服务模拟器的供应者配置列表"
+        }
+    },
+    "required": [
+        "basic",
+        "providers"
+    ]
+}
