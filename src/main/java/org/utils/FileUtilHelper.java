@@ -599,7 +599,7 @@ public class FileUtilHelper {
      * @param paths the path
      * @return the path with separator
      */
-    public static String append(String... paths) {
+    public static String append(Object... paths) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < paths.length; i++) {
             sb.append(paths[i]);
