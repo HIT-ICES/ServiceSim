@@ -1,0 +1,19 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://raw.githubusercontent.com/HIT-ICES/ServiceSim/refs/heads/lua/src/main/resources/config/schemas/basic.json",
+    "$comment": "This is the basic json schema of what a configuration of simulation must contains",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "本次模拟的uuid"
+        },
+        "name": {
+            "type": "string",
+            "description": "本次模拟的名称"
+        }
+    },
+    "required": [
+        "id"
+    ]
+}

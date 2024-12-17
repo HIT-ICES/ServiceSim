@@ -93,7 +93,7 @@ public class CloudSim {
     /**
      * The entities.
      */
-    private static List<SimEntity> entities;
+    private static List<SimEntity> entities = new ArrayList<>();
     /**
      * The simulation clock.
      */
@@ -105,7 +105,7 @@ public class CloudSim {
     /**
      * The entities by name.
      */
-    private static Map<String, SimEntity> entitiesByName;
+    private static Map<String, SimEntity> entitiesByName = new HashMap<>();
     /**
      * The wait predicates.
      */
