@@ -1,0 +1,808 @@
+simulation:
+  experimentId: 1
+
+devicesProvider:
+#  type: builtin
+#  path: 'org.infrastructureProvider.DevicesProviderSimple'
+  type: inline
+  spec:
+    - name: devices # 需要注意的是，这里的每个对象，尽管实现方式不同，都应该【实现】确定的接口，type只是指定了实现方式
+      value:
+        # type: template # 可重复的模板
+        # replica: 10
+        # spec:
+        #  type: inline # 是的，这里仍然可以引用其他东西
+        #  spec: ...
+
+        # type: script # 内联lua脚本
+        # spec: |
+        #   {/* Lua Script Here*/}
+
+        # type: builtin # 内置java对象
+        # path: "org.infrastructureProvider.DevicesProviderSimple"
+        # args:
+        # - name: argName
+        #   value:
+        #   - type: #template, builtin, script (内联lua脚本), resource
+        #     xx: ...
+
+        # type: resource # 引用用户的资源，是写好的lua脚本或者其他配置
+        # user: user-id
+        # path: "src/others/results/workloadResult1.csv"
+
+        # type: reference # 【备选模式】 引用同一文档里的值，同一实例
+        # path: $.devicesProvider.path
+
+        # type: clone # 【备选模式】 引用同一文档里的值，克隆实例
+        # path: $.devicesProvider.path
+
+        type: inline # 内联的实现，意味着这串YAML可以直接被实例化成Java Record这里通过手动列表来注入List<T>的内容
+        spec:
+          - type: inline
+            spec:
+              name: "Datacenter_0" # 基本类型：数字，布尔，字符串，以及他们的列表/数组，强制以inline方式完成，后面可以考虑宏支持，引用文档里的值
+              identify: "cloud"
+              level: 3
+              location: [-1,-1,-1] # 在这里location只根据block来区分，或者直接[-1,-1,-1]？ @FerdinandSu: 这玩意其实是个Json Array
+                # latitude: -1 # -1表示不使用这个字段
+                # longitude: -1 # -1表示不使用这个字段
+              # block: -1 # -1表示云
+              geoCoverage: [-1, -1,-1,-1] # null # 这个暂时用不到，如果使用的话是有字段的，配合location的latitude和longitude使用
+                # lat_l: -1
+                # lat_u: -1
+                # long_l: -1
+              # long_u: -1
+
+              datacenterCharacteristics:
+                type: resource
+                user: fers
+                path: /example/datacenterCharacteristics.yaml # 位于文件末尾
+
+              vmAllocationPolicy:
+                type: resource
+                user: fers
+                path: /example/vmAllocationPolicy_0.yaml # 位于文件末尾
+
+          - type: inline
+            spec:
+              name: "Datacenter_1"
+              type: NetworkDevice
+              identify: "router"
+              level: 2
+              location: [-1,-1,2]
+              geoCoverage: [-1, -1,-1,-1]
+              datacenterCharacteristics:
+                type: clone
+                path: $.devicesProvider.spec[0].value[0].spec[0].spec.datacenterCharacteristics # 引用上一个
+
+              vmAllocationPolicy:
+                type: resource
+                user: fers
+                path: /example/vmAllocationPolicy_1.yaml # 位于文件末尾
+
+
+          - type: inline
+            spec:
+              name: "Datacenter_2"
+              type: NetworkDevice
+              identify: "edge"
+              level: 1
+              location: [-1,-1,2]
+              geoCoverage: [-1, -1,-1,-1]
+              datacenterCharacteristics:
+                type: clone
+                path: $.devicesProvider.spec[0].value[0].spec[0].spec.datacenterCharacteristics # 克隆上一个
+
+              vmAllocationPolicy:
+                type: resource
+                user: fers
+                path: /example/vmAllocationPolicy_2.yaml # 位于文件末尾
+
+
+          - type: inline
+            spec:
+              name: "Datacenter_3"
+              type: NetworkDevice
+              identify: "edge"
+              level: 1
+              location: [-1,-1,2]
+              geoCoverage: [-1, -1,-1,-1]
+              datacenterCharacteristics:
+                type: clone
+                path: $.devicesProvider.spec[0].value[0].spec[0].spec.datacenterCharacteristics # 克隆第一个
+
+              vmAllocationPolicy:
+                type: clone
+                path: $.devicesProvider.spec[0].value[0].spec[2].spec.vmAllocationPolicy # 克隆上一个
+
+    - name: channels
+      value:
+        type: inline
+        spec:
+          - type: inline
+            spec:
+              source: "Datacenter_0" # 这里面每两个datacenter之间都需要有两个channel，分别代表不同的机器上传数据包的带宽和延时
+              target: "Datacenter_1"
+              channelDetail:
+                type: resource
+                user: fers
+                path: /example/channelDetail_0.yaml # 位于文件末尾
+
+          - type: inline
+            spec:
+              source: "Datacenter_1"
+              target: "Datacenter_0"
+              channelDetail:
+                type: clone
+                path: $.devicesProvider.spec[1].value[0].spec.channelDetail # 克隆上一个
+
+          - type: inline
+            spec:
+              source: "Datacenter_1"
+              target: "Datacenter_2"
+              channelDetail:
+                type: resource
+                user: fers
+                path: /example/channelDetail_1.yaml # 位于文件末尾
+
+          - type: inline
+            spec:
+              source: "Datacenter_2"
+              target: "Datacenter_1"
+              channelDetail:
+                type: clone
+                path: $.devicesProvider.spec[1].value[2].spec.channelDetail # 克隆上一个
+
+          - type: inline
+            spec:
+              source: "Datacenter_1"
+              target: "Datacenter_3"
+              channelDetail:
+                type: clone
+                path: $.devicesProvider.spec[1].value[2].spec.channelDetail # 克隆上一个
+
+          - type: inline
+            spec:
+              source: "Datacenter_3"
+              target: "Datacenter_1"
+              channelDetail:
+                type: clone
+                path: $.devicesProvider.spec[1].value[2].spec.channelDetail # 克隆上一个
+
+
+serviceProvider: # 暂时先不支持多个service provider吧，我们的重点是观察服务提供商的策略
+#  type: ServiceProvider # 这里的type是预留，后面仿真的监控指标变多，可能会存在NetworkDeviceWithMonitor
+#  name: "serviceProvider"
+  type: inline
+  spec:
+    - name: serviceChains
+      value:
+#        type: buildin
+#        path: org.serviceProvider.services.ApplicationServicesSimple
+#        params:
+#          - name: microservices
+#            value: [0, 1, 2, 3]
+#          - name: cloudletLength
+#            value: [0, 0.4, 0.4, 0.4]
+#          - name: pesNumber
+#            value: [1, 1, 1, 1]
+#          - name: memory
+#            value: [1, 1, 1, 1]
+#          - name: a
+#            value: 0.2
+#          - name: data
+#            value: 1000
+#          - name: scList
+#            value:
+#              type: inline
+#              spec:
+#                - type: inline
+#                  spec:
+#                    scId: 0
+#                    serviceRelationship:
+#                      - type: inline
+#                        spec:
+#                          svcId: 0
+#                          followSvcs: [1]
+#                      - type: inline
+#                        spec:
+#                          svcId: 1
+#                          followSvcs: [2,3]
+#
+#                - type: inline
+#                  spec:
+#                    scId: 0
+#                    serviceRelationship:
+#                      - type: inline
+#                        spec:
+#                          svcId: 0
+#                          followSvcs: [4]
+#                      - type: inline
+#                        spec:
+#                          svcId: 4
+#                          followSvcs: [3]
+#                      - type: inline
+#                        spec:
+#                          svcId: 3
+#                          followSvcs: [5]
+        type: inline
+        spec:
+          - type: inline
+            spec:
+              scId: 0
+              microservices: [0, 1, 2, 3]
+              cloudletLength: [0, 0.4, 0.4, 0.4]
+              pesNumber: [1, 1, 1, 1]
+              memory: [10, 100, 100, 100]
+              serviceStages:
+                - type: inline
+                  spec:
+                    serviceId: 0 # 每个服务+前置服务确定一个服务对应任务的stages
+                    previousScId: -1
+                    stages:
+                      - type: inline
+                        spec:
+                          type: WAIT_SEND
+                          stageOrder: 0
+                          peer: 1
+                          stageCloudletLength: 0
+                          data: 1000
+                      - type: inline
+                        spec:
+                          type: WAIT_RECV
+                          stageOrder: 1
+                          peer: 1
+                          stageCloudletLength: 0
+                          data: 1000
+
+                - type: inline
+                  spec:
+                    serviceId: 1 # 每个服务+前置服务确定一个服务对应任务的stages
+                    previousScId: 0
+                    stages:
+                      - type: inline
+                        spec:
+                          type: EXECUTION
+                          stageOrder: 0
+                          peer: 1
+                          stageCloudletLength: 0.2
+                          data: 0
+                      - type: inline
+                        spec:
+                          type: WAIT_SEND
+                          stageOrder: 1
+                          peer: 2
+                          stageCloudletLength: 0
+                          data: 1000
+                      - type: inline
+                        spec:
+                          type: WAIT_SEND
+                          stageOrder: 2
+                          peer: 3
+                          stageCloudletLength: 0
+                          data: 1000
+                      - type: inline
+                        spec:
+                          type: WAIT_RECV
+                          stageOrder: 3
+                          peer: 2
+                          stageCloudletLength: 0
+                          data: 1000
+                      - type: inline
+                        spec:
+                          type: WAIT_RECV
+                          stageOrder: 4
+                          peer: 3
+                          stageCloudletLength: 0
+                          data: 1000
+                      - type: inline
+                        spec:
+                          type: EXECUTION
+                          stageOrder: 5
+                          peer: 1
+                          stageCloudletLength: 0.2
+                          data: 0
+                      - type: inline
+                        spec:
+                          type: WAIT_SEND
+                          stageOrder: 6
+                          peer: 0
+                          stageCloudletLength: 0
+                          data: 1000
+
+                - type: inline
+                  spec:
+                    serviceId: 2 # 每个服务+前置服务确定一个服务对应任务的stages
+                    previousScId: 1
+                    stages:
+                      - type: inline
+                        spec:
+                          type: EXECUTION
+                          stageOrder: 0
+                          peer: 2
+                          stageCloudletLength: 0.4
+                          data: 0
+                      - type: inline
+                        spec:
+                          type: WAIT_SEND
+                          stageOrder: 1
+                          peer: 1
+                          stageCloudletLength: 0
+                          data: 1000
+
+                - type: inline
+                  spec:
+                    serviceId: 3 # 每个服务+前置服务确定一个服务对应任务的stages
+                    previousScId: 1
+                    stages:
+                      - type: inline
+                        spec:
+                          type: EXECUTION
+                          stageOrder: 0
+                          peer: 3
+                          stageCloudletLength: 0.4
+                          data: 0
+                      - type: inline
+                        spec:
+                          type: WAIT_SEND
+                          stageOrder: 1
+                          peer: 1
+                          stageCloudletLength: 0
+                          data: 1000
+
+          - type: inline
+            spec:
+              scId: 1
+              microservices: [0, 4, 3, 5]
+              cloudletLength: [0, 0.4, 0.4, 0.4]
+              pesNumber: [1, 1, 1, 1]
+              memory: [10, 100, 100, 100]
+              serviceStages:
+                - type: inline
+                  spec:
+                    serviceId: 0 # 每个服务+前置服务确定一个服务对应任务的stages
+                    previousScId: -1
+                    stages:
+                      - type: inline
+                        spec:
+                          type: WAIT_SEND
+                          stageOrder: 0
+                          peer: 4
+                          stageCloudletLength: 0
+                          data: 1000
+                      - type: inline
+                        spec:
+                          type: WAIT_RECV
+                          stageOrder: 1
+                          peer: 4
+                          stageCloudletLength: 0
+                          data: 1000
+
+                - type: inline
+                  spec:
+                    serviceId: 4 # 每个服务+前置服务确定一个服务对应任务的stages
+                    previousScId: 0
+                    stages:
+                        - type: inline
+                          spec:
+                            type: EXECUTION
+                            stageOrder: 0
+                            peer: 4
+                            stageCloudletLength: 0.2
+                            data: 0
+                        - type: inline
+                          spec:
+                            type: WAIT_SEND
+                            stageOrder: 1
+                            peer: 3
+                            stageCloudletLength: 0
+                            data: 1000
+                        - type: inline
+                          spec:
+                            type: WAIT_RECV
+                            stageOrder: 2
+                            peer: 3
+                            stageCloudletLength: 0
+                            data: 1000
+                        - type: inline
+                          spec:
+                            type: EXECUTION
+                            stageOrder: 3
+                            peer: 4
+                            stageCloudletLength: 0.2
+                            data: 0
+                        - type: inline
+                          spec:
+                            type: WAIT_SEND
+                            stageOrder: 4
+                            peer: 0
+                            stageCloudletLength: 0
+                            data: 1000
+
+                - type: inline
+                  spec:
+                    serviceId: 3 # 每个服务+前置服务确定一个服务对应任务的stages
+                    previousScId: 4
+                    stages:
+                      - type: inline
+                        spec:
+                          type: EXECUTION
+                          stageOrder: 0
+                          peer: 3
+                          stageCloudletLength: 0.2
+                          data: 0
+                      - type: inline
+                        spec:
+                          type: WAIT_SEND
+                          stageOrder: 1
+                          peer: 5
+                          stageCloudletLength: 0
+                          data: 1000
+                      - type: inline
+                        spec:
+                          type: WAIT_RECV
+                          stageOrder: 2
+                          peer: 5
+                          stageCloudletLength: 0
+                          data: 1000
+                      - type: inline
+                        spec:
+                          type: EXECUTION
+                          stageOrder: 3
+                          peer: 3
+                          stageCloudletLength: 0.2
+                          data: 0
+                      - type: inline
+                        spec:
+                          type: WAIT_SEND
+                          stageOrder: 4
+                          peer: 4
+                          stageCloudletLength: 0
+                          data: 1000
+
+
+                - type: inline
+                    spec:
+                      serviceId: 5 # 每个服务+前置服务确定一个服务对应任务的stages
+                      previousScId: 3
+                      stages:
+                        - type: inline
+                          spec:
+                            type: EXECUTION
+                            stageOrder: 0
+                            peer: 5
+                            stageCloudletLength: 0.4
+                            data: 0
+                        - type: inline
+                          spec:
+                            type: WAIT_SEND
+                            stageOrder: 1
+                            peer: 3
+                            stageCloudletLength: 0
+                            data: 1000
+
+    - name: loadAdmission
+      value:
+        type: inline
+        spec:
+          - type: inline
+            spec:
+              device: "Datacenter_0"
+              loadAdmissionRule:
+                type: buildin
+                path: "org.serviceProvider.capacities.NonLoadAdmission"
+
+          - type: inline
+            spec:
+              device: "Datacenter_1"
+              loadAdmissionRule:
+                type: buildin
+                path: "org.serviceProvider.capacities.NonLoadAdmission"
+
+          - type: inline
+            spec:
+              device: "Datacenter_2"
+              loadAdmissionRule:
+                type: buildin
+                path: "org.serviceProvider.capacities.NonLoadAdmission"
+
+          - type: inline
+            spec:
+              device: "Datacenter_3"
+              loadAdmissionRule:
+                type: buildin
+                path: "org.serviceProvider.capacities.NonLoadAdmission"
+
+#        type: buildin
+#        path: "org.serviceProvider.capacities.NonLoadAdmission"
+#        params:
+#          - name: targetDevices
+#            value: ["Datacenter_0", "Datacenter_1", "Datacenter_2", "Datacenter_3"]
+
+    - name: loadBalance
+      value:
+        type: inline
+        spec:
+          - type: inline
+            spec:
+              device: "Datacenter_0"
+              loadBalanceRule:
+                type: buildin
+                path: "org.serviceProvider.capacities.RoundRobin"
+
+          - type: inline
+            spec:
+              device: "Datacenter_1"
+              loadBalanceRule:
+                type: buildin
+                path: "org.serviceProvider.capacities.RoundRobin"
+
+          - type: inline
+            spec:
+              device: "Datacenter_2"
+              loadBalanceRule:
+                type: buildin
+                path: "org.serviceProvider.capacities.RoundRobin"
+
+          - type: inline
+            spec:
+              device: "Datacenter_3"
+              loadBalanceRule:
+                type: buildin
+                path: "org.serviceProvider.capacities.RoundRobin"
+
+#        type: buildin
+#        path: "org.serviceProvider.capacities.RoundRobin"
+#        params:
+#          - name: targetDevices
+#            value: ["Datacenter_0", "Datacenter_1", "Datacenter_2", "Datacenter_3"]
+
+
+    - name: requestDispatching
+      value:
+        type: inline
+        spec:
+          - type: inline
+            spec:
+              device: "Datacenter_0"
+              diapatchRule:
+                type: buildin
+                path: "org.serviceProvider.capacities.RequestDispatchingSimple"
+                params:
+                  - name: dispatchRange
+                    value: ["Datacenter_0", "Datacenter_1"]
+
+          - type: inline
+            spec:
+              device: "Datacenter_1"
+              diapatchRule:
+                type: buildin
+                path: "org.serviceProvider.capacities.RequestDispatchingSimple"
+                params:
+                  - name: dispatchRange
+                    value: ["Datacenter_1"]
+
+          - type: inline
+            spec:
+              device: "Datacenter_2"
+              diapatchRule:
+                type: buildin
+                path: "org.serviceProvider.capacities.RequestDispatchingSimple"
+                params:
+                  - name: dispatchRange
+                    value: ["Datacenter_2"]
+
+          - type: inline
+            spec:
+              device: "Datacenter_3"
+              diapatchRule:
+                type: buildin
+                path: "org.serviceProvider.capacities.RequestDispatchingSimple"
+                params:
+                  - name: dispatchRange
+                    value: ["Datacenter_3"]
+
+    - name: initInstance
+      value:
+        type: inline
+        spec:
+          - type: inline
+            spec:
+              device: "Datacenter_0"
+              serviceToNum:
+                type: inline
+                spec:
+                  - type: inline
+                    spec:
+                      serviceId: 0
+                      typeToNum:
+                        - type: inline
+                          spec:
+                            typeId: 0
+                            num: 1
+                  - type: inline
+                    spec:
+                      serviceId: 1
+                      typeToNum:
+                        - type: inline
+                          spec:
+                            typeId: 0
+                            num: 2
+                  - type: inline
+                    spec:
+                      serviceId: 2
+                      typeToNum:
+                        - type: clone
+                          path: $.serviceProvider.spec[4].value[0].spec.serviceToNum[1].spec.typeToNum # 克隆上一个
+                  - type: inline
+                    spec:
+                      serviceId: 3
+                      typeToNum:
+                        - type: inline
+                          spec:
+                            typeId: 0
+                            num: 4
+                  - type: inline
+                    spec:
+                      serviceId: 4
+                      typeToNum:
+                        - type: clone
+                          path: $.serviceProvider.spec[4].value[0].spec.serviceToNum[1].spec.typeToNum # 克隆上一个
+                  - type: inline
+                    spec:
+                      serviceId: 5
+                      typeToNum:
+                        - type: clone
+                          path: $.serviceProvider.spec[4].value[0].spec.serviceToNum[1].spec.typeToNum # 克隆上一个
+
+          - type: inline
+            spec:
+              device: "Datacenter_1"
+              serviceToNum:
+                - type: clone
+                  path: $.serviceProvider.spec[4].value[0].spec.serviceToNum[0] # 克隆上一个
+
+          - type: inline
+              spec:
+              device: "Datacenter_2"
+              serviceToNum:
+                - type: clone
+                  path: $.serviceProvider.spec[4].value[0].spec.serviceToNum # 克隆上一个
+
+          - type: inline
+              spec:
+              device: "Datacenter_3"
+              serviceToNum:
+                - type: clone
+                  path: $.serviceProvider.spec[4].value[0].spec.serviceToNum # 克隆上一个
+
+    - name: outputFiles
+      value:
+        - type: inline
+          spec:
+            workloadResult: "src/others/results/workloadResult1.csv" # 设定一个路径，文件名和实验的experimentId: 1相关
+            cloudletExeDetail: "src/others/results/cloudletExeDetail1.csv"
+            cloudletStageDetail: "src/others/results/cloudletStagesDetail1.csv"
+
+
+endUser:
+  type: buildin # lua
+  path: "org.enduser.EndUser"
+  params:
+    - name: name
+      value: "endUser"
+    - name: flag
+      value: 0 # 标识是哪个方法
+    - name: limit
+      value: 60 # 60s
+    - name: endUserSimFile
+      value: "workloadTest1.csv" # 60s
+
+
+---
+# /example/datacenterCharacteristics.yaml
+
+arch: "x86"          # 系统架构
+os: "Linux"          # 操作系统
+vmm: "Xen"           # 虚拟机管理程序
+timeZone: 10.0       # 时区
+cost:
+  processing: 3.0    # 处理资源的成本
+  memory: 0.05       # 使用内存的成本
+  storage: 0.1       # 使用存储的成本
+  bandwidth: 0.1     # 使用带宽的成本
+
+---
+# /example/hostDetail.yaml
+ramProvisioner:
+  type: builtin
+  path: "org.infrastructureProvider.policies.provisioners.RamProvisionerSimple"
+  params:
+    - name: ram
+      value: 4096
+bwProvisioner:
+  type: inline # 简写，我们对常用的这种东西提供可使用Record初始化的默认实现，用户inline -> record -> BwProvisionerSimple
+  spec:
+    bw: 10000
+storage: 1000000 #
+vmScheduler: # @FerdinandSu: 这些没改 @mai: finish
+  type: builtin
+  path: "org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared"
+  params:
+    - name: pes
+      value:
+        type: template
+        replica: 8
+        spec:
+          peProvisioner:
+            type: builtin
+            path: "org.infrastructureProvider.policies.provisioners.PeProvisionerSimple"
+            params:
+              - name: mips
+                value: 40
+
+---
+# /example/vmAllocationPolicy_0.yaml
+
+type: builtin
+path: "org.infrastructureProvider.policies.VmAllocationPolicySimple"
+args:
+  - name: hosts
+    value:
+      type: template
+      replica: 8
+      spec:
+        type: resource
+        user: fers
+        path: /example/hostDetail.yaml # 位于文件末尾
+
+---
+# /example/vmAllocationPolicy_1.yaml
+
+type: builtin
+path: "org.infrastructureProvider.policies.VmAllocationPolicySimple"
+args:
+  - name: hosts
+    value:
+      type: template
+      replica: 1
+      spec:
+        type: resource
+        user: fers
+        path: /example/hostDetail.yaml # 位于文件末尾
+
+---
+# /example/vmAllocationPolicy_2.yaml
+
+type: builtin
+path: "org.infrastructureProvider.policies.VmAllocationPolicySimple"
+args:
+  - name: hosts
+    value:
+      type: template
+      replica: 1
+      spec:
+        type: resource
+        user: fers
+        path: /example/hostDetail.yaml # 位于文件末尾
+
+---
+# /example/channelDetail_0.yaml
+
+bandwidth: 104857600 # 100 * 1024 * 1024
+latency: 0.15
+packetScheduler:
+  type: builtin # 可以lua
+  path: "org.infrastructureProvider.policies.PacketSchedulerTimeShared"
+
+
+---
+# /example/channelDetail_1.yaml
+
+bandwidth: 104857600 # 100 * 1024 * 1024
+latency: 0.002
+packetScheduler:
+  type: builtin # 可以lua
+  path: "org.infrastructureProvider.policies.PacketSchedulerTimeShared"
+
+
