@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings({"CommentedOutCode", "unchecked", "unused"})
+@SuppressWarnings({ "CommentedOutCode", "unchecked", "unused" })
 public class NetworkDevice extends Datacenter {
 
     /* routing */
@@ -49,14 +49,17 @@ public class NetworkDevice extends Datacenter {
     private Map<Integer, ArrayList<NetworkPacket>> sendToSameLevelDevicesPktList = new HashMap<>();
     private Map<Integer, ArrayList<NetworkPacket>> sendToChildDevicesPktList = new HashMap<>();
 
-//    private List<?
-//    extends NetworkPacket> receivedResponsePackets = new ArrayList<>();
-//
-//    private Map<Integer, List<? extends NetworkPacket>> sendToSameLevelDevicesPktList = new HashMap<>();
-//
-//    private Map<Integer, List<? extends NetworkPacket>> sendToChildDevicesPktList = new HashMap<>();
-//
-//    private Map<Integer, List<? extends NetworkPacket>> sendToParentDevicesPktList = new HashMap<>();
+    // private List<?
+    // extends NetworkPacket> receivedResponsePackets = new ArrayList<>();
+    //
+    // private Map<Integer, List<? extends NetworkPacket>>
+    // sendToSameLevelDevicesPktList = new HashMap<>();
+    //
+    // private Map<Integer, List<? extends NetworkPacket>> sendToChildDevicesPktList
+    // = new HashMap<>();
+    //
+    // private Map<Integer, List<? extends NetworkPacket>>
+    // sendToParentDevicesPktList = new HashMap<>();
     private Map<Integer, ArrayList<NetworkPacket>> sendToParentDevicesPktList = new HashMap<>();
 
     /* NetworkCloudlet */
@@ -72,7 +75,6 @@ public class NetworkDevice extends Datacenter {
 
     private LoadAdmission loadAdmission; // load admission for gateway
 
-
     /* record */
     // for vm destroy
     private Map<Integer, Boolean> vmsNeedToDestroy = new HashMap<>();
@@ -80,34 +82,46 @@ public class NetworkDevice extends Datacenter {
     /**
      * Allocates a new PowerDatacenter object.
      *
-     * @param name               the name to be associated with this entity (as required by Sim_entity class from
+     * @param name               the name to be associated with this entity (as
+     *                           required by Sim_entity class from
      *                           sim java package)
      * @param characteristics    an object of DatacenterCharacteristics
      * @param vmAllocationPolicy the vmAllocationPolicy
-     * @param storageList        a LinkedList of storage elements, for data simulation
+     * @param storageList        a LinkedList of storage elements, for data
+     *                           simulation
      * @param schedulingInterval the scheduling interval
      * @throws Exception This happens when one of the following scenarios occurs:
      *                   <ul>
-     *                   <li>creating this entity before initializing CloudSim package
+     *                   <li>creating this entity before initializing CloudSim
+     *                   package
      *                   <li>this entity name is <tt>null</tt> or empty
-     *                   <li>this entity has <tt>zero</tt> number of PEs (Processing Elements). <br>
-     *                   No PEs mean the Cloudlets can't be processed. A CloudResource must contain one or
+     *                   <li>this entity has <tt>zero</tt> number of PEs (Processing
+     *                   Elements). <br>
+     *                   No PEs mean the Cloudlets can't be processed. A
+     *                   CloudResource must contain one or
      *                   more Machines. A Machine must contain one or more PEs.
      *                   </ul>
      * @pre name != null
      * @pre resource != null
      * @post $none
      */
-    public NetworkDevice(String name, DatacenterCharacteristics characteristics,
-                         VmAllocationPolicy vmAllocationPolicy, List<Storage> storageList, double schedulingInterval,
-                         Location location, GeoCoverage geoCoverage, String identify, int level) throws Exception {
+    public NetworkDevice(
+            String name,
+            DatacenterCharacteristics characteristics,
+            VmAllocationPolicy vmAllocationPolicy,
+            List<Storage> storageList,
+            double schedulingInterval,
+            Location location,
+            GeoCoverage geoCoverage,
+            String identify,
+            int level
+        ) throws Exception {
         super(name, characteristics, vmAllocationPolicy, storageList, schedulingInterval);
         this.location = location;
         this.geoCoverage = geoCoverage;
         this.identify = identify;
         this.level = level;
         serviceDiscovery = new ServiceDiscovery();
-
     }
 
     @Override
@@ -145,7 +159,6 @@ public class NetworkDevice extends Datacenter {
         }
     }
 
-
     protected void processNetworkPacketArrival(SimEvent ev) {
 
         List<NetworkPacket> networkPackets = (List<NetworkPacket>) ev.getData();
@@ -178,14 +191,16 @@ public class NetworkDevice extends Datacenter {
 
                     // 2. load balance
                     int instanceId;
-//                    if (networkPacket.getDestinationServiceId() == 0){
-//                        instanceId = loadBalance.findService0InstanceId(serviceDiscovery,
-//                        networkPacket.getServiceChainInfo().getServiceChainId(),getId());
-//                    }else{
-//                        instanceId = loadBalance.findInstanceId(serviceDiscovery, networkPacket.getDestinationServiceId(),getId());
-//
-//                    }
-                    instanceId = loadBalance.findInstanceId(serviceDiscovery, networkPacket.getDestinationServiceId(), getId());
+                    // if (networkPacket.getDestinationServiceId() == 0){
+                    // instanceId = loadBalance.findService0InstanceId(serviceDiscovery,
+                    // networkPacket.getServiceChainInfo().getServiceChainId(),getId());
+                    // }else{
+                    // instanceId = loadBalance.findInstanceId(serviceDiscovery,
+                    // networkPacket.getDestinationServiceId(),getId());
+                    //
+                    // }
+                    instanceId = loadBalance.findInstanceId(serviceDiscovery, networkPacket.getDestinationServiceId(),
+                            getId());
                     if (instanceId < 0) {
                         Log.printLine(CloudSim.clock() + ": " + getName() + ": can not find instance!");
                         return;
@@ -214,7 +229,8 @@ public class NetworkDevice extends Datacenter {
                     getReceivedResponsePackets().add(networkPacket);
 
                     CloudSim.cancelAll(getId(), new PredicateType(ServiceSimEvents.Cloudlet_UPDATE_FOR_RESPONSE));
-                    send(getId(), PolicyConstants.ResponseDataArrivalProcess, ServiceSimEvents.Cloudlet_UPDATE_FOR_RESPONSE);
+                    send(getId(), PolicyConstants.ResponseDataArrivalProcess,
+                            ServiceSimEvents.Cloudlet_UPDATE_FOR_RESPONSE);
 
                 } else {
                     System.out.println("NETWORK DEVICE ERROR: Unknown Packet.");
@@ -242,14 +258,15 @@ public class NetworkDevice extends Datacenter {
         cl.setVmId(networkPacket.getDestinationVm());
         cl.setUserId(networkPacket.getUserId());
         // task stages
-        ArrayList<ServiceStage> serviceStages = networkPacket.getServiceChainInfo().getServiceStagesMap().get(serviceId).get(preServiceId);
+        ArrayList<ServiceStage> serviceStages = networkPacket.getServiceChainInfo().getServiceStagesMap().get(serviceId)
+                .get(preServiceId);
         for (ServiceStage serviceStage : serviceStages) {
-            TaskStage taskStage = new TaskStage(serviceStage.getType(), serviceStage.getStageCloudletLength(), serviceStage.getData(), serviceStage.getStageId(), serviceStage.getPeer());
+            TaskStage taskStage = new TaskStage(serviceStage.getType(), serviceStage.getStageCloudletLength(),
+                    serviceStage.getData(), serviceStage.getStageId(), serviceStage.getPeer());
             cl.stages.add(taskStage);
         }
         return cl;
     }
-
 
     public void networkPacketSend() {
         // 1. same level nodes
@@ -356,8 +373,9 @@ public class NetworkDevice extends Datacenter {
     }
 
     public void cloudletProcessUpdate(Vm vm) {
-        double nextCheckInterval = vm.updateVmProcessing(CloudSim.clock(), getVmAllocationPolicy().getHost(vm).getVmScheduler()
-                .getAllocatedMipsForVm(vm));
+        double nextCheckInterval = vm.updateVmProcessing(CloudSim.clock(),
+                getVmAllocationPolicy().getHost(vm).getVmScheduler()
+                        .getAllocatedMipsForVm(vm));
         if (nextCheckInterval > 0 && nextCheckInterval != Double.MAX_VALUE) {
             send(getId(), nextCheckInterval, ServiceSimEvents.Cloudlet_PROCESS_UPDATE, vm);
         }
@@ -385,7 +403,8 @@ public class NetworkDevice extends Datacenter {
                     networkPacket.setDestinationCloudlet(cld2Packet.getSourceCloudlet());
                 } else {
                     networkPacket.setType(NetworkConstants.REQUEST);
-                    int destination = getRequestDispatchingRule().findDeviceId(networkPacket, serviceDiscovery, getId(), childDeviceIds, parentDeviceIds, sameLevelDeviceIds);
+                    int destination = getRequestDispatchingRule().findDeviceId(networkPacket, serviceDiscovery, getId(),
+                            childDeviceIds, parentDeviceIds, sameLevelDeviceIds);
                     networkPacket.setDestination(destination);
                 }
                 networkPacket.setSendTime(CloudSim.clock());
@@ -411,8 +430,10 @@ public class NetworkDevice extends Datacenter {
             int id = networkCloudletScheduler.getCloudletFinishedList().get(i).getCloudletId();
             NetworkPacket networkPacket = cloudletIdToPacket.get(id);
             cloudletIdToPacket.remove(id);
-            Pair<Cloudlet, NetworkPacket> data = new Pair<>(networkCloudletScheduler.getCloudletFinishedList().get(i).getCloudlet(), networkPacket);
-            sendNow(networkCloudletScheduler.getCloudletFinishedList().get(i).getUserId(), CloudSimTags.CLOUDLET_RETURN, data);
+            Pair<Cloudlet, NetworkPacket> data = new Pair<>(
+                    networkCloudletScheduler.getCloudletFinishedList().get(i).getCloudlet(), networkPacket);
+            sendNow(networkCloudletScheduler.getCloudletFinishedList().get(i).getUserId(), CloudSimTags.CLOUDLET_RETURN,
+                    data);
         }
         networkCloudletScheduler.getCloudletFinishedList().clear();
 
@@ -448,7 +469,6 @@ public class NetworkDevice extends Datacenter {
             cloudletProcessUpdate(vm);
             cloudletProcessChecking(vm);
         }
-
 
     }
 
@@ -553,7 +573,8 @@ public class NetworkDevice extends Datacenter {
             for (int i = 0; i < getRequestDispatchingRule().getNetworkDevices().size(); i++) {
                 if (getRequestDispatchingRule().getNetworkDevices().get(i).getId() != getId()) {
                     Pair<Integer, MicroserviceInstance> data1 = new Pair<>(getId(), instance);
-                    sendNow(getRequestDispatchingRule().getNetworkDevices().get(i).getId(), ServiceSimEvents.Service_DISCOVERY_ADD, data1);
+                    sendNow(getRequestDispatchingRule().getNetworkDevices().get(i).getId(),
+                            ServiceSimEvents.Service_DISCOVERY_ADD, data1);
                 }
             }
         }
@@ -570,22 +591,22 @@ public class NetworkDevice extends Datacenter {
             for (int i = 0; i < getRequestDispatchingRule().getNetworkDevices().size(); i++) {
                 if (getRequestDispatchingRule().getNetworkDevices().get(i).getId() != getId()) {
                     Pair<Integer, MicroserviceInstance> data1 = new Pair<>(getId(), instance);
-                    sendNow(getRequestDispatchingRule().getNetworkDevices().get(i).getId(), ServiceSimEvents.Service_DISCOVERY_DEL, data1);
+                    sendNow(getRequestDispatchingRule().getNetworkDevices().get(i).getId(),
+                            ServiceSimEvents.Service_DISCOVERY_DEL, data1);
                 }
             }
         }
 
     }
 
-
-//    public <T extends NetworkPacket> List<T> getPackets(Map<Integer, List<? extends NetworkPacket>> devicesToPackets, int key){
-//        return (List<T>) devicesToPackets.get(key);
-//    }
+    // public <T extends NetworkPacket> List<T> getPackets(Map<Integer, List<?
+    // extends NetworkPacket>> devicesToPackets, int key){
+    // return (List<T>) devicesToPackets.get(key);
+    // }
 
     public ArrayList<NetworkPacket> getPackets(Map<Integer, ArrayList<NetworkPacket>> devicesToPackets, int key) {
         return devicesToPackets.get(key);
     }
-
 
     /* getter and setter */
     public Location getLocation() {
@@ -676,36 +697,43 @@ public class NetworkDevice extends Datacenter {
         this.loadAdmission = loadAdmission;
     }
 
-//    public <T extends NetworkPacket> List<T> getReceiveResponsePackets(){
-//        return (List<T>) receivedResponsePackets;
-//    }
-//    protected <T extends NetworkPacket> void setReceiveResponsePackets(List<T> receivedResponsePackets) {
-//        this.receivedResponsePackets = receivedResponsePackets;
-//    }
-//
-//    public Map<Integer, List<? extends NetworkPacket>> getSendToSameLevelDevicesPktList() {
-//        return sendToSameLevelDevicesPktList;
-//    }
-//
-//    public void setSendToSameLevelDevicesPktList(Map<Integer, List<? extends NetworkPacket>> sendToSameLevelDevicesPktList) {
-//        this.sendToSameLevelDevicesPktList = sendToSameLevelDevicesPktList;
-//    }
-//
-//    public Map<Integer, List<? extends NetworkPacket>> getSendToChildDevicesPktList() {
-//        return sendToChildDevicesPktList;
-//    }
-//
-//    public void setSendToChildDevicesPktList(Map<Integer, List<? extends NetworkPacket>> sendToChildDevicesPktList) {
-//        this.sendToChildDevicesPktList = sendToChildDevicesPktList;
-//    }
-//
-//    public Map<Integer, List<? extends NetworkPacket>> getSendToParentDevicesPktList() {
-//        return sendToParentDevicesPktList;
-//    }
-//
-//    public void setSendToParentDevicesPktList(Map<Integer, List<? extends NetworkPacket>> sendToParentDevicesPktList) {
-//        this.sendToParentDevicesPktList = sendToParentDevicesPktList;
-//    }
+    // public <T extends NetworkPacket> List<T> getReceiveResponsePackets(){
+    // return (List<T>) receivedResponsePackets;
+    // }
+    // protected <T extends NetworkPacket> void setReceiveResponsePackets(List<T>
+    // receivedResponsePackets) {
+    // this.receivedResponsePackets = receivedResponsePackets;
+    // }
+    //
+    // public Map<Integer, List<? extends NetworkPacket>>
+    // getSendToSameLevelDevicesPktList() {
+    // return sendToSameLevelDevicesPktList;
+    // }
+    //
+    // public void setSendToSameLevelDevicesPktList(Map<Integer, List<? extends
+    // NetworkPacket>> sendToSameLevelDevicesPktList) {
+    // this.sendToSameLevelDevicesPktList = sendToSameLevelDevicesPktList;
+    // }
+    //
+    // public Map<Integer, List<? extends NetworkPacket>>
+    // getSendToChildDevicesPktList() {
+    // return sendToChildDevicesPktList;
+    // }
+    //
+    // public void setSendToChildDevicesPktList(Map<Integer, List<? extends
+    // NetworkPacket>> sendToChildDevicesPktList) {
+    // this.sendToChildDevicesPktList = sendToChildDevicesPktList;
+    // }
+    //
+    // public Map<Integer, List<? extends NetworkPacket>>
+    // getSendToParentDevicesPktList() {
+    // return sendToParentDevicesPktList;
+    // }
+    //
+    // public void setSendToParentDevicesPktList(Map<Integer, List<? extends
+    // NetworkPacket>> sendToParentDevicesPktList) {
+    // this.sendToParentDevicesPktList = sendToParentDevicesPktList;
+    // }
 
     public Map<Integer, Channel> getSameLevelDevicesToChannel() {
         return sameLevelDevicesToChannel;
@@ -794,6 +822,5 @@ public class NetworkDevice extends Datacenter {
     public void setCloudletIdToPacket(Map<Integer, NetworkPacket> cloudletIdToPacket) {
         this.cloudletIdToPacket = cloudletIdToPacket;
     }
-
 
 }

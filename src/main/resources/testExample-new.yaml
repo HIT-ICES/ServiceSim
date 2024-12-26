@@ -8,6 +8,34 @@ devicesProvider:
   spec:
     - name: devices # 需要注意的是，这里的每个对象，尽管实现方式不同，都应该【实现】确定的接口，type只是指定了实现方式
       value:
+        # type: template # 可重复的模板
+        # replica: 10
+        # spec:
+        #  type: inline # 是的，这里仍然可以引用其他东西
+        #  spec: ...
+
+        # type: script # 内联lua脚本
+        # spec: |
+        #   {/* Lua Script Here*/}
+
+        # type: builtin # 内置java对象
+        # path: "org.infrastructureProvider.DevicesProviderSimple"
+        # args:
+        # - name: argName
+        #   value:
+        #   - type: #template, builtin, script (内联lua脚本), resource
+        #     xx: ...
+
+        # type: resource # 引用用户的资源，是写好的lua脚本或者其他配置
+        # user: user-id
+        # path: "src/others/results/workloadResult1.csv"
+
+        # type: reference # 【备选模式】 引用同一文档里的值，同一实例
+        # path: $.devicesProvider.path
+
+        # type: clone # 【备选模式】 引用同一文档里的值，克隆实例
+        # path: $.devicesProvider.path
+
         type: inline # 内联的实现，意味着这串YAML可以直接被实例化成Java Record这里通过手动列表来注入List<T>的内容
         spec:
           - type: inline
@@ -52,7 +80,6 @@ devicesProvider:
                 user: fers
                 path: /example/vmAllocationPolicy_1.yaml # 位于文件末尾
 
-
           - type: inline
             spec:
               name: "Datacenter_2"
@@ -69,7 +96,6 @@ devicesProvider:
                 type: resource
                 user: fers
                 path: /example/vmAllocationPolicy_2.yaml # 位于文件末尾
-
 
           - type: inline
             spec:

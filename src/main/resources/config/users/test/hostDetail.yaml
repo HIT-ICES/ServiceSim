@@ -1,0 +1,43 @@
+type: builtin
+path: org.infrastructureProvider.entities.Host
+args:
+  - name: id
+    value: ${autoint}
+  - name: ramProvisioner
+    value:
+      type: builtin
+      path: org.infrastructureProvider.policies.provisioners.RamProvisionerSimple
+      args:
+        - name: availableRam
+          value: 4096
+  - name: bwProvisioner
+    value:
+      type: builtin
+      path: org.infrastructureProvider.policies.provisioners.BwProvisionerSimple
+      args:
+        - name: bw
+          value: 10000
+  - name: storage
+    value: 1000000
+  - name: vmScheduler
+    value:
+      type: builtin
+      path: org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared
+      args:
+        - name: peList
+          value:
+            type: template
+            replica: 8
+            spec:
+              type: builtin
+              path: org.infrastructureProvider.entities.Pe
+              args:
+                - name: id
+                  value: ${autoint}
+                - name: peProvisioner
+                  value:
+                    type: builtin
+                    path: org.infrastructureProvider.policies.provisioners.PeProvisionerSimple
+                    args:
+                      - name: availableMips
+                        value: 40

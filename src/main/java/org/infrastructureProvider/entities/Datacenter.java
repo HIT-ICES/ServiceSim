@@ -102,7 +102,7 @@ public class Datacenter extends SimEntity {
         setCharacteristics(characteristics);
         setVmAllocationPolicy(vmAllocationPolicy);
         setLastProcessTime(0.0);
-        setStorageList(storageList);
+        setStorageList(storageList == null ? new ArrayList<>() : storageList);
         setVmList(new ArrayList<>());
         setSchedulingInterval(schedulingInterval);
 

@@ -1,6 +1,5 @@
 package org.utils;
 
-@SuppressWarnings("unused")
 public class Location {
 
     public double latitude;
@@ -17,7 +16,6 @@ public class Location {
         return latitude;
     }
 
-    @SuppressWarnings("unused")
     public void setLatitude(double latitude) {
         this.latitude = latitude;
     }

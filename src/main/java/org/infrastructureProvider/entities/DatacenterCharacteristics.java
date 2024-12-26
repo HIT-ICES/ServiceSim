@@ -12,6 +12,7 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.lists.HostList;
 import org.cloudbus.cloudsim.lists.PeList;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -135,7 +136,7 @@ public class DatacenterCharacteristics {
         setId(-1);
         setArchitecture(architecture);
         setOs(os);
-        setHostList(hostList);
+        setHostList(hostList == null ? new ArrayList<>() : hostList);
         setAllocationPolicy(allocationPolicy);
         setCostPerSecond(costPerSec);
 

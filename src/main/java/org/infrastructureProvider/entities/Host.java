@@ -100,6 +100,32 @@ public class Host {
     }
 
     /**
+     * Instantiates a new host.
+     *
+     * @param id             the id
+     * @param ramProvisioner the ram provisioner
+     * @param bwProvisioner  the bw provisioner
+     * @param storage        the storage
+     * @param peList         the pe list
+     * @param vmScheduler    the vm scheduler
+     */
+    public Host(
+            int id,
+            RamProvisioner ramProvisioner,
+            BwProvisioner bwProvisioner,
+            long storage,
+            VmScheduler vmScheduler) {
+        setId(id);
+        setRamProvisioner(ramProvisioner);
+        setBwProvisioner(bwProvisioner);
+        setStorage(storage);
+        setVmScheduler(vmScheduler);
+
+        setPeList(vmScheduler.getPeList());
+        setFailed(false);
+    }
+
+    /**
      * Requests updating of processing in cloudlets in the VMs running in this host.
      *
      * @param currentTime the current time

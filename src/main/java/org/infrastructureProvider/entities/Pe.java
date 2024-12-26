@@ -19,7 +19,6 @@ import org.infrastructureProvider.policies.provisioners.PeProvisioner;
  * @author Rajkumar Buyya
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings("unused")
 public class Pe {
 
     /**

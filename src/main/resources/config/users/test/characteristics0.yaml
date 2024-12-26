@@ -1,0 +1,27 @@
+type: builtin
+path: org.infrastructureProvider.entities.DatacenterCharacteristics
+args:
+  - name: architecture
+    value: x86
+  - name: os
+    value: Linux
+  - name: vmm
+    value: Xen
+  - name: hostList
+    value:
+      type: template
+      replica: 8
+      spec:
+        type: resource
+        user: test
+        path: hostDetail.yaml
+  - name: timeZone
+    value: 10.0
+  - name: costPerSec
+    value: 3.0
+  - name: costPerMem
+    value: 0.05
+  - name: costPerStorage
+    value: 0.1
+  - name: costPerBw
+    value: 0.1

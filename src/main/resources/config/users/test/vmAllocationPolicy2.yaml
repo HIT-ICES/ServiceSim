@@ -1,0 +1,7 @@
+type: builtin
+path: org.infrastructureProvider.policies.VmAllocationPolicySimple
+args:
+  - name: list
+    value:
+      type: refrence
+      path: .providers[0].provider.params.devices[2].args.characteristics.args.hostList

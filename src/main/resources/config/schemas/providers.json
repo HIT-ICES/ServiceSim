@@ -12,14 +12,21 @@
             },
             "class": {
                 "type": "string",
-                "enum": ["device", "service"],
+                "enum": [
+                    "device",
+                    "service"
+                ],
                 "description": "服务提供者的类型"
             },
             "provider": {
                 "$ref": "#/$defs/template"
             }
         },
-        "required": ["name", "class", "provider"]
+        "required": [
+            "name",
+            "class",
+            "provider"
+        ]
     },
     "$defs": {
         "name": {
@@ -50,11 +57,14 @@
                         "description": "参数名"
                     },
                     "value": {
-                        "$ref": "#/$defs/template",
+                        "$ref": "#/$defs/value",
                         "description": "参数值"
                     }
                 },
-                "required": ["name", "value"]
+                "required": [
+                    "name",
+                    "value"
+                ]
             }
         },
         "template": {
@@ -67,7 +77,9 @@
                     "$ref": "#/$defs/type"
                 }
             },
-            "required": ["type"],
+            "required": [
+                "type"
+            ],
             "allOf": [
                 {
                     "if": {
@@ -176,8 +188,7 @@
                         "properties": {
                             "path": {
                                 "type": "string",
-                                "description": "服务提供者的引用路径, 例如: $.providers[0]",
-                                "pattern": "^\\$\\.providers\\[\\d+\\]$"
+                                "description": "服务提供者的引用路径"
                             }
                         }
                     }
@@ -211,18 +222,25 @@
                     "then": {
                         "properties": {
                             "spec": {
-                                "type": "array",
-                                "description": "服务提供者的规格",
-                                "items": {
-                                    "$ref": "#/$defs/template"
-                                }
+                                "type": "object",
+                                "description": "服务提供者的规格"
                             },
                             "children": {
                                 "type": "string",
-                                "description": "服务提供者的子节点实现类"
+                                "description": "服务提供者的子节点实现类(如果为数组必须包含此字段)"
                             }
                         }
                     }
+                }
+            ]
+        },
+        "value": {
+            "oneOf": [
+                {
+                    "type": "object"
+                },
+                {
+                    "$ref": "#/$defs/template"
                 }
             ]
         }
