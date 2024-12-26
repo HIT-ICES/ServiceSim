@@ -1,0 +1,16 @@
+
+basic:
+  id: 33eed7a4-5486-4a7c-883b-b2307f9bfce8
+  name: simulation
+providers: 
+  - name: deviceProvider
+    class: devices
+    provider: 
+      name: provider
+      type: builtin
+      path: org.infrastructureProvider.DevicesProviderSimple
+      params: 
+        - name: devices
+          value:
+            
+      

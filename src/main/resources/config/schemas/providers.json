@@ -216,6 +216,10 @@
                                 "items": {
                                     "$ref": "#/$defs/template"
                                 }
+                            },
+                            "children": {
+                                "type": "string",
+                                "description": "服务提供者的子节点实现类"
                             }
                         }
                     }

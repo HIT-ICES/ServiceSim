@@ -12,6 +12,9 @@ public final class ConfigFactory {
         if (config == null || config.isEmpty()) {
             throw new IllegalArgumentException("Config file not found: " + path);
         }
+        if (path.endsWith(".yaml") || path.endsWith(".yml")) {
+            config = YamlToJson.convert(config);
+        }
         return JSONObject.parseObject(config);
     }
 
@@ -20,7 +23,7 @@ public final class ConfigFactory {
     }
 
     public static void main(String[] args) {
-        Simulation simulation = ConfigFactory.getSimulation("template.json");
+        Simulation simulation = ConfigFactory.getSimulation("template.yaml");
         System.out.println(simulation);
     }
 }
