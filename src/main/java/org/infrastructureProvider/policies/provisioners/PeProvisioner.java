@@ -9,6 +9,7 @@
 package org.infrastructureProvider.policies.provisioners;
 
 
+import com.alibaba.fastjson.JSONObject;
 import org.infrastructureProvider.entities.Vm;
 
 import java.util.List;

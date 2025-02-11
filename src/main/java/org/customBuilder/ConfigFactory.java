@@ -10,6 +10,7 @@ public final class ConfigFactory {
 
     public static JSONObject getConfig(String path) {
         String config = FileUtilHelper.readFileText(FileUtilHelper.append(CONFIG_BASE_PATH, path));
+
         if (config == null || config.isEmpty()) {
             throw new IllegalArgumentException("Config file not found: " + path);
         }

@@ -1,5 +1,7 @@
 package org.utils;
 
+import com.alibaba.fastjson.JSONObject;
+
 public class Location {
 
     public double latitude;
@@ -10,6 +12,13 @@ public class Location {
         this.latitude = latitude;
         this.longitude = longitude;
         this.block = block;
+    }
+
+    public Location(JSONObject config)
+    {
+        this(config.getDouble("latitude"),
+            config.getDouble("longitude"),
+            config.getInteger("block"));
     }
 
     public double getLatitude() {

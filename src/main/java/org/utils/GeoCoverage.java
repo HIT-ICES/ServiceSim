@@ -1,5 +1,7 @@
 package org.utils;
 
+import com.alibaba.fastjson.JSONObject;
+
 /* iFogSim */
 @SuppressWarnings("unused")
 public class GeoCoverage {
@@ -14,6 +16,14 @@ public class GeoCoverage {
         this.lat_u = lat_u;
         this.long_l = long_l;
         this.long_u = long_u;
+    }
+
+    public GeoCoverage(JSONObject config)
+    {
+        this(config.getDouble("lat_l"),
+            config.getDouble("lat_u"),
+            config.getDouble("long_l"),
+            config.getDouble("long_u"));
     }
 
     public boolean covers(GeoCoverage geo) {

@@ -8,6 +8,8 @@
 
 package org.infrastructureProvider.entities;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.lists.HostList;
 import org.cloudbus.cloudsim.lists.PeList;
@@ -146,6 +148,25 @@ public class DatacenterCharacteristics {
         setCostPerMem(costPerMem);
         setCostPerStorage(costPerStorage);
         setCostPerBw(costPerBw);
+    }
+
+    public DatacenterCharacteristics(JSONObject config)
+    {
+        this(config.getString("architecture"),
+            config.getString("os"),
+            config.getString("vmm"),
+            new ArrayList<>(),
+            config.getDouble("timeZone"),
+            config.getDouble("costPerSec"),
+            config.getDouble("costPerMem"),
+            config.getDouble("costPerStorage"),
+            config.getDouble("costPerBw"));
+
+        JSONArray hostListArray = config.getJSONArray("hostList");
+        for(int i = 0; i < hostListArray.size(); i++){
+            JSONObject hostConfig = hostListArray.getJSONObject(i);
+            getHostList().add(new Host(hostConfig));
+        }
     }
 
     /**

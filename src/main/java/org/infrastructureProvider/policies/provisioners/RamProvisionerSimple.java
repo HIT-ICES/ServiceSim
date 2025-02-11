@@ -8,6 +8,7 @@
 
 package org.infrastructureProvider.policies.provisioners;
 
+import com.alibaba.fastjson.JSONObject;
 import org.infrastructureProvider.entities.Vm;
 
 import java.util.HashMap;
@@ -36,6 +37,10 @@ public class RamProvisionerSimple extends RamProvisioner {
     public RamProvisionerSimple(int availableRam) {
         super(availableRam);
         setRamTable(new HashMap<>());
+    }
+
+    public RamProvisionerSimple(JSONObject config){
+        this(config.getInteger("availableRam"));
     }
 
     /*

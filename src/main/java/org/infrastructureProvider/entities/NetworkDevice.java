@@ -1,5 +1,6 @@
 package org.infrastructureProvider.entities;
 
+import com.alibaba.fastjson.JSONObject;
 import javafx.util.Pair;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Storage;
@@ -11,6 +12,7 @@ import org.cloudbus.cloudsim.core.predicates.PredicateType;
 import org.enduser.networkPacket.*;
 import org.infrastructureProvider.policies.NetworkCloudletScheduler;
 import org.infrastructureProvider.policies.VmAllocationPolicy;
+import org.infrastructureProvider.policies.VmAllocationPolicySimple;
 import org.serviceProvider.capacities.LoadAdmission;
 import org.serviceProvider.capacities.LoadBalance;
 import org.serviceProvider.capacities.RequestDispatchingRule;
@@ -122,6 +124,19 @@ public class NetworkDevice extends Datacenter {
         this.identify = identify;
         this.level = level;
         serviceDiscovery = new ServiceDiscovery();
+    }
+
+    public NetworkDevice(JSONObject config) throws Exception
+    {
+        this(config.getString("name"),
+            new DatacenterCharacteristics(config.getJSONObject("characteristics")),
+            new VmAllocationPolicySimple(config.getJSONObject("vmAllocationPolicy")),
+            new ArrayList<>(),
+            config.getDouble("schedulingInterval"),
+            new Location(config.getJSONObject("location")),
+            new GeoCoverage(config.getJSONObject("geoCoverage")),
+            config.getString("identify"),
+            config.getInteger("level"));
     }
 
     @Override

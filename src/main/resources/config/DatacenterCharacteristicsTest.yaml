@@ -1,0 +1,63 @@
+architecture: "x86"
+os: "linux"
+vmm: "Xen"
+hostList:
+  - id: 1
+    ramProvisioner:
+      availableRam: 1000
+    bwProvisioner:
+      bw: 1000
+    storage: 1
+    peList:
+      - id: 1
+        peProvisioner:
+          availableMips: 100
+      - id: 2
+        peProvisioner:
+          availableMips: 100
+      - id: 3
+        peProvisioner:
+          availableMips: 100
+    vmScheduler:
+      peList:
+        - id: 1
+          peProvisioner:
+            availableMips: 100
+        - id: 2
+          peProvisioner:
+            availableMips: 100
+        - id: 3
+          peProvisioner:
+            availableMips: 100
+  - id: 2
+    ramProvisioner:
+      availableRam: 1000
+    bwProvisioner:
+      bw: 1000
+    storage: 1
+    peList:
+      - id: 1
+        peProvisioner:
+          availableMips: 100
+      - id: 2
+        peProvisioner:
+          availableMips: 100
+      - id: 3
+        peProvisioner:
+          availableMips: 100
+    vmScheduler:
+      peList:
+        - id: 1
+          peProvisioner:
+            availableMips: 100
+        - id: 2
+          peProvisioner:
+            availableMips: 100
+        - id: 3
+          peProvisioner:
+            availableMips: 100
+timeZone: 0
+costPerSec: 0
+costPerMem: 0
+costPerStorage: 0
+costPerBw: 0

@@ -1,0 +1,18 @@
+package org.infrastructureProvider.entities;
+
+import com.alibaba.fastjson.JSONObject;
+import org.customBuilder.ConfigFactory;
+import org.junit.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class HostTest
+{
+    @Test
+    public void testConstructorWithConfig()
+    {
+        JSONObject config = ConfigFactory.getConfig("HostTest.yaml");
+        Host host = new Host(config);
+        assertNotNull(host);
+    }
+}

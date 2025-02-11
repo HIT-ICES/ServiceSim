@@ -8,7 +8,9 @@
 
 package org.infrastructureProvider.entities;
 
+import com.alibaba.fastjson.JSONObject;
 import org.infrastructureProvider.policies.provisioners.PeProvisioner;
+import org.infrastructureProvider.policies.provisioners.PeProvisionerSimple;
 
 /**
  * CloudSim Pe (Processing Element) class represents CPU unit, defined in terms of Millions
@@ -68,6 +70,11 @@ public class Pe {
 
         // when created, it should be set to FREE, i.e., available for use.
         status = FREE;
+    }
+
+    public Pe(JSONObject config){
+        this(config.getInteger("id"),
+                new PeProvisionerSimple(config.getJSONObject("peProvisioner")));
     }
 
     /**

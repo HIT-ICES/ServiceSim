@@ -9,6 +9,7 @@
 package org.infrastructureProvider.policies.provisioners;
 
 
+import com.alibaba.fastjson.JSONObject;
 import org.infrastructureProvider.entities.Vm;
 
 import java.util.ArrayList;
@@ -39,6 +40,10 @@ public class PeProvisionerSimple extends PeProvisioner {
     public PeProvisionerSimple(double availableMips) {
         super(availableMips);
         setPeTable(new HashMap<String, ArrayList<Double>>());
+    }
+
+    public PeProvisionerSimple(JSONObject config){
+        this(config.getDouble("availableMips"));
     }
 
     /*

@@ -8,6 +8,7 @@
 
 package org.infrastructureProvider.policies.provisioners;
 
+import com.alibaba.fastjson.JSONObject;
 import org.infrastructureProvider.entities.Vm;
 
 import java.util.HashMap;
@@ -36,6 +37,11 @@ public class BwProvisionerSimple extends BwProvisioner {
     public BwProvisionerSimple(long bw) {
         super(bw);
         setBwTable(new HashMap<>());
+    }
+
+    public BwProvisionerSimple(JSONObject config)
+    {
+        this(config.getLong("bw"));
     }
 
     /*

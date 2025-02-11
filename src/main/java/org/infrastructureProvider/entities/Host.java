@@ -7,12 +7,17 @@
 
 package org.infrastructureProvider.entities;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.lists.PeList;
+import org.infrastructureProvider.policies.provisioners.BwProvisionerSimple;
+import org.infrastructureProvider.policies.provisioners.RamProvisionerSimple;
 import org.infrastructureProvider.policies.vm.VmScheduler;
 import org.infrastructureProvider.policies.provisioners.BwProvisioner;
 import org.infrastructureProvider.policies.provisioners.RamProvisioner;
+import org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,6 +102,22 @@ public class Host {
 
         setPeList(peList);
         setFailed(false);
+    }
+
+    public Host(JSONObject config)
+    {
+        this(config.getInteger("id"),
+            new RamProvisionerSimple(config.getJSONObject("ramProvisioner")),
+            new BwProvisionerSimple(config.getJSONObject("bwProvisioner")),
+            config.getLong("storage"),
+            new ArrayList<>(),
+            new VmSchedulerSpaceShared(config.getJSONObject("vmScheduler")));
+
+        JSONArray peListArray = config.getJSONArray("peList");
+        for (int i = 0; i < peListArray.size(); i++) {
+            JSONObject peConfig = peListArray.getJSONObject(i);
+            getPeList().add(new Pe(peConfig));
+        }
     }
 
     /**

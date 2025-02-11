@@ -1,5 +1,6 @@
 package org.infrastructureProvider;
 
+import com.alibaba.fastjson.JSONObject;
 import org.cloudbus.cloudsim.Storage;
 import org.infrastructureProvider.entities.*;
 import org.infrastructureProvider.policies.PacketSchedulerTimeShared;
@@ -24,6 +25,11 @@ public class DevicesProviderSimple extends DevicesProvider {
 
     public DevicesProviderSimple() {
         super();
+    }
+
+    public DevicesProviderSimple(JSONObject config)
+    {
+        super(config);
     }
 
     @Override

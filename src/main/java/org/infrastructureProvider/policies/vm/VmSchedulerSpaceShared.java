@@ -8,6 +8,8 @@
 
 package org.infrastructureProvider.policies.vm;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.infrastructureProvider.entities.Pe;
 import org.infrastructureProvider.entities.Vm;
 
@@ -45,6 +47,17 @@ public class VmSchedulerSpaceShared extends VmScheduler {
         setPeAllocationMap(new HashMap<>());
         setFreePes(new ArrayList<>());
         getFreePes().addAll(peList);
+    }
+
+    public VmSchedulerSpaceShared(JSONObject config)
+    {
+        this(new ArrayList<Pe>());
+
+        JSONArray peListArray = config.getJSONArray("peList");
+        for (int i = 0; i < peListArray.size(); i++) {
+            JSONObject peConfig = peListArray.getJSONObject(i);
+            getPeList().add(new Pe(peConfig));
+        }
     }
 
     /*

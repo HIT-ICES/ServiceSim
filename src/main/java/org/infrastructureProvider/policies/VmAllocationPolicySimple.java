@@ -8,6 +8,8 @@
 
 package org.infrastructureProvider.policies;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.infrastructureProvider.entities.Host;
@@ -61,6 +63,17 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 
         setVmTable(new HashMap<>());
         setUsedPes(new HashMap<>());
+    }
+
+    public VmAllocationPolicySimple(JSONObject config)
+    {
+        this(new ArrayList<>());
+        JSONArray listArray = config.getJSONArray("list");
+        for (int i = 0; i < listArray.size(); i++) {
+            JSONObject obj = listArray.getJSONObject(i);
+            Host host = new Host(obj);
+            getHostList().add(host);
+        }
     }
 
     /**
