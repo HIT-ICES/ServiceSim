@@ -122,11 +122,7 @@ public class ProfileFactory {
             case RESOURCE -> instance = fromResource(profile, context, name, defaultClass);
             case TEMPLATE -> instance = fromTemplate(profile, context, name, defaultClass);
             case REFERENCE -> instance = fromRefrence(profile, context, name, defaultClass);
-            case CLONE -> {
-                JSONObject clone = (JSONObject) profile.clone();
-                clone.remove("");
-                instance = fromJSONObject(clone, context, name, defaultClass);
-            }
+            case CLONE -> instance = fromClone(profile, context, name, defaultClass);
             default -> {
                 logger.error("无法识别的类型: {}, 位于: {}", type, context + "." + name);
                 throw new IllegalArgumentException("无法识别的类型: " + type);
