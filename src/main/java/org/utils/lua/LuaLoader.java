@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class LuaLoader implements Closeable {
-    private static final String resourcePath = FileUtilHelper.getResourcePath("lua");
+    private static final String resourcePath = FileUtilHelper.getResourcePath("config");
 
     private String path;
     private Lua L;
