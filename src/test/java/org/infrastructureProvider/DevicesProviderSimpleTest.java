@@ -7,13 +7,11 @@ import org.junit.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DevicesProviderSimpleTest
-{
+public class DevicesProviderSimpleTest {
     @Test
-    public void testConstructorWithConfig()
-    {
+    public void testConstructorWithConfig() {
         JSONObject config = ConfigFactory.getUserConfig("LoadTest","DevicesProviderSimpleTest.yaml");
-        ProfileFactory profileFactory = new ProfileFactory(config);
+        new ProfileFactory(config);
         DevicesProvider devicesProvider = new DevicesProviderSimple(config);
         assertNotNull(devicesProvider);
         System.out.println(devicesProvider);

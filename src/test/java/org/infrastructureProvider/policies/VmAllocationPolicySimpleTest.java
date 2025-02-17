@@ -7,13 +7,11 @@ import org.junit.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class VmAllocationPolicySimpleTest
-{
+public class VmAllocationPolicySimpleTest {
     @Test
-    public void testConstructorWithConfig()
-    {
+    public void testConstructorWithConfig() {
         JSONObject config = ConfigFactory.getUserConfig("LoadTest","VmAllocationPolicySimpleTest.yaml");
-        ProfileFactory profileFactory = new ProfileFactory(config);
+        new ProfileFactory(config);
         VmAllocationPolicy vmAllocationPolicy = new VmAllocationPolicySimple(config);
         assertNotNull(vmAllocationPolicy);
         System.out.println(vmAllocationPolicy);

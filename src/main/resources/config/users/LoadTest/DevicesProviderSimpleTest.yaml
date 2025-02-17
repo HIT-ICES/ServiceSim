@@ -1,6 +1,12 @@
 devices:
   $type: template
   $count: 10
+  $idType: replace
+  $ids:
+    - $key: 
+        - name
+        - identify
+      $replace: device{id}
   $template:
     $type: resource
     $user: LoadTest

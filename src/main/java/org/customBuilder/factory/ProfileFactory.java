@@ -31,8 +31,7 @@ public class ProfileFactory {
      * 用于第一次创建工厂，将其与配置文件绑定
      * @param config 配置信息
      */
-    public ProfileFactory(JSONObject config)
-    {
+    public ProfileFactory(JSONObject config) {
         buildTree = new BuildTree();
         ProfileFactory.setContext(config, "");
         ProfileFactory.setFactory(config, this);
@@ -202,12 +201,19 @@ public class ProfileFactory {
         String className = profile.getString("$path");
         Class<?> clazz = null;
 
+        String nowContext = "";
+        if (name.startsWith("[") && name.endsWith("]")) {
+            nowContext = context + name;
+        } else {
+            nowContext = context + "." + name;
+        }
+
         // 获取类
         if (className != null) {
             try {
                 clazz = Class.forName(className);
             } catch (ClassNotFoundException e) {
-                logger.error("无法找到类: {}, 位于: {}", className, context + "." + name);
+                logger.error("无法找到类: {}, 位于: {}", className, nowContext);
                 throw new IllegalArgumentException("无法找到类: " + className);
             }
         } else {
@@ -219,19 +225,19 @@ public class ProfileFactory {
             Constructor<?> constructor = clazz.getConstructor(JSONObject.class);
             return constructor.newInstance(profile);
         } catch (NoSuchMethodException e) {
-            logger.error("无法找到JSONObject构造函数: {}, 位于: {}", clazz.getName(), context + "." + name);
+            logger.error("无法找到JSONObject构造函数: {}, 位于: {}", clazz.getName(), nowContext);
             throw new IllegalArgumentException("无法找到构造函数: " + clazz.getName());
         } catch (InstantiationException e) {
-            logger.error("无法实例化类: {}, 位于: {}", clazz.getName(), context + "." + name);
+            logger.error("无法实例化类: {}, 位于: {}", clazz.getName(), nowContext);
             throw new IllegalArgumentException("无法实例化类: " + clazz.getName());
         } catch (IllegalAccessException e) {
-            logger.error("无法访问类: {}, 位于: {}", clazz.getName(), context + "." + name);
+            logger.error("无法访问类: {}, 位于: {}", clazz.getName(), nowContext);
             throw new IllegalArgumentException("无法访问类: " + clazz.getName());
         } catch (IllegalArgumentException e) {
-            logger.error("参数错误: {}, 位于: {}", clazz.getName(), context + "." + name);
+            logger.error("参数错误: {}, 位于: {}", clazz.getName(), nowContext);
             throw new IllegalArgumentException("参数错误: " + clazz.getName());
         } catch (InvocationTargetException e) {
-            logger.error("调用目标错误: {}, 位于: {}", clazz.getName(), context + "." + name);
+            logger.error("调用目标错误: {}, 位于: {}", clazz.getName(), nowContext);
             throw new IllegalArgumentException("调用目标错误: " + clazz.getName());
         }
     }
@@ -263,6 +269,14 @@ public class ProfileFactory {
         String user = profile.getString("$user");
         String path = profile.getString("$path");
         JSONObject resource = ConfigFactory.getUserConfig(user, path);
+
+        // 注入一些额外信息
+        for (String key : profile.keySet()) {
+            if (!key.startsWith("$")) {
+                resource.put(key, profile.get(key));
+            }
+        }
+
         return fromJSONObject(resource, context, name, defaultClass);
     }
 
@@ -284,6 +298,34 @@ public class ProfileFactory {
                         String uuid = UUID.randomUUID().toString();
                         for (int j = 0; j < ids.size(); j++) {
                             child.put(ids.getString(j), uuid);
+                        }
+                    }
+                    case "replace" -> {
+                        Integer start = profile.getInteger("$start");
+                        Integer step = profile.getInteger("$step");
+                        if (start == null) start = 0;
+                        if (step == null) step = 1;
+                        String uuid = UUID.randomUUID().toString();
+                        for (int j = 0; j < ids.size(); j++) {
+                            JSONObject id = ids.getJSONObject(j);
+                            Object key = id.get("$key");
+                            List<String> keys = new ArrayList<>();
+                            if (key != null) {
+                                if (key instanceof String) {
+                                    keys.add((String) key);
+                                } else if (key instanceof JSONArray) {
+                                    JSONArray keyArray = (JSONArray) key;
+                                    for (int k = 0; k < keyArray.size(); k++) {
+                                        keys.add(keyArray.getString(k));
+                                    }
+                                }
+                            }
+                            String replace = id.getString("$replace");
+                            replace = replace.replace("{id}", String.valueOf(start + i * step));
+                            replace = replace.replace("{uuid}", uuid);
+                            for (String k : keys) {
+                                child.put(k, replace);
+                            }
                         }
                     }
                     default -> { // "auto"

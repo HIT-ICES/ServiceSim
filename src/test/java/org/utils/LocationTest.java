@@ -7,13 +7,11 @@ import org.junit.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LocationTest
-{
+public class LocationTest {
     @Test
-    public void testConstructorWithConfig()
-    {
+    public void testConstructorWithConfig() {
         JSONObject config = ConfigFactory.getUserConfig("LoadTest","LocationTest.yaml");
-        ProfileFactory profileFactory = new ProfileFactory(config);
+        new ProfileFactory(config);
         Location location = new Location(config);
         assertNotNull(location);
         System.out.println(location);

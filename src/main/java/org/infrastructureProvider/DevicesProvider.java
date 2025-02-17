@@ -1,6 +1,5 @@
 package org.infrastructureProvider;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.customBuilder.factory.ProfileFactory;
 import org.infrastructureProvider.entities.NetworkDevice;
@@ -20,13 +19,12 @@ public abstract class DevicesProvider implements DeviceProviderInterface {
     }
 
     @SuppressWarnings("unchecked")
-    public DevicesProvider(JSONObject config)
-    {
+    public DevicesProvider(JSONObject config) {
         // 从配置中读取工厂
         ProfileFactory factory = config.getObject("$factory", ProfileFactory.class);
 
         // 利用工厂方法读取devices
-        devices = (List<? extends NetworkDevice>)factory.getInstance(config,"devices",NetworkDevice.class);
+        devices = (List<? extends NetworkDevice>) factory.getInstance(config,"devices",NetworkDevice.class);
 
         //读入routingTable：
         routingTable = new HashMap<>();
