@@ -1,0 +1,21 @@
+characteristics:
+  $type: resource
+  $user: LoadTest
+  $path: DatacenterCharacteristicsTest.yaml
+vmAllocationPolicy:
+  list:
+    $type: reference
+    $path: hostList #相对路径解析问题 改为/devices[0].characteristics.hostList后通过
+storageList: null
+schedulingInterval: 1
+location:
+  $type: resource
+  $user: LoadTest
+  $path: LocationTest.yaml
+geoCoverage:
+  $type: resource
+  $user: LoadTest
+  $path: GeoCoverageTest.yaml
+level: 1
+name: device1
+identify: device1 # name和identify是字符串，考虑也自动生成？

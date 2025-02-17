@@ -1,0 +1,17 @@
+architecture: "x86"
+os: "linux"
+vmm: "Xen"
+hostList:
+  $type: template
+  $count: 8
+  $ids:
+    - id
+  $template:
+    $type: resource
+    $user: LoadTest
+    $path: HostTemplate.yaml
+timeZone: 0
+costPerSec: 0
+costPerMem: 0
+costPerStorage: 0
+costPerBw: 0

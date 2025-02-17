@@ -9,6 +9,7 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
+import org.customBuilder.factory.ProfileFactory;
 import org.enduser.networkPacket.*;
 import org.infrastructureProvider.policies.NetworkCloudletScheduler;
 import org.infrastructureProvider.policies.VmAllocationPolicy;
@@ -129,12 +130,16 @@ public class NetworkDevice extends Datacenter {
     public NetworkDevice(JSONObject config) throws Exception
     {
         this(config.getString("name"),
-            new DatacenterCharacteristics(config.getJSONObject("characteristics")),
-            new VmAllocationPolicySimple(config.getJSONObject("vmAllocationPolicy")),
+            (DatacenterCharacteristics) config.getObject("$factory", ProfileFactory.class)
+                    .getInstance(config,"characteristics",DatacenterCharacteristics.class),
+            (VmAllocationPolicy) config.getObject("$factory", ProfileFactory.class)
+                    .getInstance(config,"vmAllocationPolicy",VmAllocationPolicySimple.class),
             new ArrayList<>(),
             config.getDouble("schedulingInterval"),
-            new Location(config.getJSONObject("location")),
-            new GeoCoverage(config.getJSONObject("geoCoverage")),
+            (Location) config.getObject("$factory", ProfileFactory.class)
+                    .getInstance(config,"location",Location.class),
+            (GeoCoverage) config.getObject("$factory", ProfileFactory.class)
+                    .getInstance(config,"geoCoverage",GeoCoverage.class),
             config.getString("identify"),
             config.getInteger("level"));
     }

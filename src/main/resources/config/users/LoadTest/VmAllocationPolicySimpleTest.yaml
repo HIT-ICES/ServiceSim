@@ -1,0 +1,9 @@
+list:
+  $type: template
+  $count: 8
+  $ids:
+    - id
+  $template:
+    $type: resource
+    $user: LoadTest
+    $path: HostTemplate.yaml

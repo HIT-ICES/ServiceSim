@@ -1,7 +1,6 @@
-id: 0
-ramProvisioner: 
+ramProvisioner:
   availableRam: 4096
-bwProvisioner: 
+bwProvisioner:
   bw: 1000
 storage: 1000000
 peList:
@@ -10,7 +9,7 @@ peList:
   $ids:
     - id
   $template:
-    peProvisioner: 
+    peProvisioner:
       availableMips: 40
 vmScheduler:
   peList:

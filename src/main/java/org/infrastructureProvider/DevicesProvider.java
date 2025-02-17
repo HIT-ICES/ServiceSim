@@ -2,6 +2,7 @@ package org.infrastructureProvider;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.customBuilder.factory.ProfileFactory;
 import org.infrastructureProvider.entities.NetworkDevice;
 
 import java.util.*;
@@ -19,25 +20,17 @@ public abstract class DevicesProvider implements DeviceProviderInterface {
 
     }
 
+    @SuppressWarnings("unchecked")
     public DevicesProvider(JSONObject config)
     {
-        devices = new ArrayList<>();
-        routingTable = new HashMap<>();
+        // 从配置中读取工厂
+        ProfileFactory factory = config.getObject("$factory", ProfileFactory.class);
 
-        // 读入devices：遍历devices数组，将读取到的每个deviceConfig传给NetworkDevice的构造方法
-        JSONArray devicesArray = config.getJSONArray("devices");
-        for (int i = 0; i < devicesArray.size(); i++) {
-            JSONObject deviceConfig = devicesArray.getJSONObject(i);
-            try
-            {
-                getDevices().add(new NetworkDevice(deviceConfig));
-            } catch (Exception e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
+        // 利用工厂方法读取devices
+        devices = (List<? extends NetworkDevice>)factory.getInstance(config,"devices",NetworkDevice.class);
 
         //读入routingTable：
+        routingTable = new HashMap<>();
         JSONObject routingTableConfig = config.getJSONObject("routingTable");
         // 获取 routingTable 中的所有外层键
         for(String outKey: routingTableConfig.keySet())

@@ -13,6 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.lists.HostList;
 import org.cloudbus.cloudsim.lists.PeList;
+import org.customBuilder.factory.ProfileFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -150,23 +151,33 @@ public class DatacenterCharacteristics {
         setCostPerBw(costPerBw);
     }
 
+    @SuppressWarnings("unchecked")
     public DatacenterCharacteristics(JSONObject config)
     {
-        this(config.getString("architecture"),
-            config.getString("os"),
-            config.getString("vmm"),
-            new ArrayList<>(),
-            config.getDouble("timeZone"),
-            config.getDouble("costPerSec"),
-            config.getDouble("costPerMem"),
-            config.getDouble("costPerStorage"),
-            config.getDouble("costPerBw"));
+        ProfileFactory factory = config.getObject("$factory", ProfileFactory.class);
+        String architecture = config.getString("architecture");
+        String os = config.getString("os");
+        String vmm = config.getString("vmm");
+        List<? extends Host> hostList = (List<? extends Host>) factory.getInstance(config,"hostList",Host.class);
+        double timeZone = config.getDouble("timeZone");
+        double costPerSec = config.getDouble("costPerSec");
+        double costPerMem = config.getDouble("costPerMem");
+        double costPerStorage = config.getDouble("costPerStorage");
+        double costPerBw = config.getDouble("costPerBw");
 
-        JSONArray hostListArray = config.getJSONArray("hostList");
-        for(int i = 0; i < hostListArray.size(); i++){
-            JSONObject hostConfig = hostListArray.getJSONObject(i);
-            getHostList().add(new Host(hostConfig));
-        }
+        setId(-1);
+        setArchitecture(architecture);
+        setOs(os);
+        setHostList(hostList == null ? new ArrayList<>() : hostList);
+        setAllocationPolicy(allocationPolicy);
+        setCostPerSecond(costPerSec);
+
+        setTimeZone(0.0);
+
+        setVmm(vmm);
+        setCostPerMem(costPerMem);
+        setCostPerStorage(costPerStorage);
+        setCostPerBw(costPerBw);
     }
 
     /**

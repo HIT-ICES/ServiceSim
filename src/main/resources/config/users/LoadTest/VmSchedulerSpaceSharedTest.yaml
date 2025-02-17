@@ -1,0 +1,8 @@
+peList:
+  $type: template
+  $count: 8
+  $ids:
+    - id
+  $template:
+    peProvisioner:
+      availableMips: 40

@@ -26,7 +26,23 @@ public class ProfileFactory {
         buildTree = new BuildTree();
     }
 
-    // 获取上下文
+    /**
+     * 初始化配置工厂
+     * 用于第一次创建工厂，将其与配置文件绑定
+     * @param config 配置信息
+     */
+    public ProfileFactory(JSONObject config)
+    {
+        buildTree = new BuildTree();
+        ProfileFactory.setContext(config, "");
+        ProfileFactory.setFactory(config, this);
+    }
+
+    /**
+     * 获取上下文
+     * @param profile 配置信息
+     * @return 上下文 即本配置信息对应节点在构造树中的位置描述(父节点上下文+name) 上下文在构造时由父节点注入
+     */
     public static String getContext(JSONObject profile) {
         String context = profile.getString("$context");
         if (context == null) {
@@ -35,12 +51,20 @@ public class ProfileFactory {
         return context;
     }
 
-    // 设置上下文
+    /**
+     * 设置上下文
+     * @param profile 配置信息
+     * @param context 上下文
+     */
     public static void setContext(JSONObject profile, String context) {
         profile.put("$context", context);
     }
 
-    // 获取类型
+    /**
+     * 获取BuildType
+     * @param profile 配置信息
+     * @return BuildType
+     */
     public static BuildType getType(JSONObject profile) {
         String type = profile.getString("$type");
         if (type == null) {
@@ -49,16 +73,18 @@ public class ProfileFactory {
         return BuildType.valueOf(type.toUpperCase());
     }
 
-    // 获取路由
+    /**
+     * 获取路由
+     * @param context 上下文
+     * @param ref (相对)路径
+     *          /xxx.xxx.xxx 从根节点开始
+     *          ./xxx.xxx.xxx 与当前节点同级
+     *          xxx.xxx.xxx 与当前节点同级
+     *          ../xxx.xxx.xxx 向上一级
+     *          ../../xxx.xxx.xxx 向上两级
+     * @return 根据上下文和引用得到的绝对路径
+     */
     public static String getRoute(String context, String ref) {
-        /*
-         * /xxx.xxx.xxx 从根节点开始
-         * ./xxx.xxx.xxx 与当前节点同级
-         * xxx.xxx.xxx 与当前节点同级
-         * ../xxx.xxx.xxx 向上一级
-         * ../../xxx.xxx.xxx 向上两级
-         * ......
-         */
 
         String route = null;
         if (ref.startsWith("/")) {
@@ -91,12 +117,22 @@ public class ProfileFactory {
         return route;
     }
 
-    // 设置工厂
+    /**
+     * 设置工厂
+     * @param profile 配置信息
+     * @param factory 工厂，该配置将由指定的工厂来构建
+     */
     public static void setFactory(JSONObject profile, ProfileFactory factory) {
         profile.put("$factory", factory);
     }
 
-    // 从配置文件创建实例
+    /**
+     * 从配置信息中创建实例
+     * @param self 父节点的配置信息
+     * @param childName 子节点名称
+     * @param defaultClass 默认类
+     * @return 目标实例
+     */
     public Object getInstance(JSONObject self, String childName, Class<?> defaultClass) {
         String context = getContext(self);
         Object child = self.get(childName);

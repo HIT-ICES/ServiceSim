@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.customBuilder.factory.ProfileFactory;
 import org.infrastructureProvider.entities.Host;
 import org.infrastructureProvider.entities.Vm;
 
@@ -65,15 +66,21 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
         setUsedPes(new HashMap<>());
     }
 
+    @SuppressWarnings("unchecked")
     public VmAllocationPolicySimple(JSONObject config)
     {
-        this(new ArrayList<>());
-        JSONArray listArray = config.getJSONArray("list");
-        for (int i = 0; i < listArray.size(); i++) {
-            JSONObject obj = listArray.getJSONObject(i);
-            Host host = new Host(obj);
-            getHostList().add(host);
+        super((List<? extends Host>)
+            config.getObject("$factory", ProfileFactory.class)
+            .getInstance(config,"list", Host.class));
+
+        setFreePes(new ArrayList<>());
+        for (Host host : getHostList()) {
+            getFreePes().add(host.getNumberOfPes());
+
         }
+
+        setVmTable(new HashMap<>());
+        setUsedPes(new HashMap<>());
     }
 
     /**

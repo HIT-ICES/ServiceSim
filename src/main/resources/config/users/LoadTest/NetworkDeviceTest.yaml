@@ -1,0 +1,21 @@
+name: device1
+characteristics:
+  $type: resource
+  $user: LoadTest
+  $path: DatacenterCharacteristicsTest.yaml
+vmAllocationPolicy:
+  list:
+    $type: reference
+    $path: /characteristics.hostList
+storageList: null
+schedulingInterval: 1
+location:
+  $type: resource
+  $user: LoadTest
+  $path: LocationTest.yaml
+geoCoverage:
+  $type: resource
+  $user: LoadTest
+  $path: GeoCoverageTest.yaml
+identify: device1
+level: 1
