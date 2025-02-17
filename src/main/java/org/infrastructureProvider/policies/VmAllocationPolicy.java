@@ -24,7 +24,6 @@ import java.util.Map;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings("unused")
 public abstract class VmAllocationPolicy {
 
     /**

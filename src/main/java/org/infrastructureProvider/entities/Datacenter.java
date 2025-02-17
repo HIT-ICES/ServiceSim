@@ -32,7 +32,6 @@ import java.util.*;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings({"unused"})
 public class Datacenter extends SimEntity {
     private static final Logger logger = LoggerFactory.getLogger(Datacenter.class);
 

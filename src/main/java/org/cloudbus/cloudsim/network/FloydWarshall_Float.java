@@ -16,7 +16,6 @@ package org.cloudbus.cloudsim.network;
  * @version 1.2, 6/20/2005
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings({"unused"})
 public class FloydWarshall_Float {
 
     /**

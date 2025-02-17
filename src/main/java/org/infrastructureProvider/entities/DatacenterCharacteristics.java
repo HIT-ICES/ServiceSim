@@ -30,7 +30,7 @@ import java.util.Objects;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings({"unused", "SameParameterValue"})
+@SuppressWarnings({"SameParameterValue"})
 public class DatacenterCharacteristics {
 
     /**

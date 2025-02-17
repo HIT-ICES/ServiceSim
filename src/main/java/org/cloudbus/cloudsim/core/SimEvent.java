@@ -16,7 +16,6 @@ package org.cloudbus.cloudsim.core;
  * @see Simulation
  * @see SimEntity
  */
-@SuppressWarnings("unused")
 public class SimEvent implements Cloneable, Comparable<SimEvent> {
 
     public static final int ENULL = 0;

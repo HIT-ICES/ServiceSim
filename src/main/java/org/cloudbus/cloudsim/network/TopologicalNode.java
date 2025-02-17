@@ -15,7 +15,6 @@ package org.cloudbus.cloudsim.network;
  * @author Thomas Hohnstein
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings("unused")
 public class TopologicalNode {
 
     /**
@@ -47,7 +46,6 @@ public class TopologicalNode {
     /**
      * constructs a new node including world-coordinates
      */
-    @SuppressWarnings("unused")
     public TopologicalNode(int nodeID, int x, int y) {
         // let's initialize all private class attributes
         this.nodeID = nodeID;

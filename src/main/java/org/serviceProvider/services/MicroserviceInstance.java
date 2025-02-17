@@ -7,7 +7,6 @@ import org.utils.PolicyConstants;
 
 import java.util.ArrayList;
 
-@SuppressWarnings("unused")
 public class MicroserviceInstance extends Vm {
 
     public int serviceId;
@@ -105,7 +104,6 @@ public class MicroserviceInstance extends Vm {
         this.status = status;
     }
 
-    @SuppressWarnings("unused")
     public double getRequestTime() {
         return requestTime;
     }

@@ -14,7 +14,6 @@ package org.cloudbus.cloudsim;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 2.1.2
  */
-@SuppressWarnings("unused")
 public class VmStateHistoryEntry {
 
     /**

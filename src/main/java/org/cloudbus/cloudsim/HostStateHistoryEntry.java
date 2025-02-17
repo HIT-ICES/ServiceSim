@@ -14,7 +14,6 @@ package org.cloudbus.cloudsim;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 2.1.2
  */
-@SuppressWarnings("unused")
 public class HostStateHistoryEntry {
 
     /**
@@ -75,7 +74,6 @@ public class HostStateHistoryEntry {
      *
      * @return the allocated mips
      */
-    @SuppressWarnings("unused")
     public double getAllocatedMips() {
         return allocatedMips;
     }

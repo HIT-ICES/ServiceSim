@@ -7,7 +7,6 @@ import org.infrastructureProvider.entities.NetworkDevice;
 
 import java.util.*;
 
-@SuppressWarnings("unused")
 public abstract class DevicesProvider implements DeviceProviderInterface {
 
     private List<? extends NetworkDevice> devices;

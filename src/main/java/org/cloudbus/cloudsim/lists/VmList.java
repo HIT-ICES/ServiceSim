@@ -49,7 +49,6 @@ public class VmList {
      * @pre $none
      * @post $none
      */
-    @SuppressWarnings("unused")
     public static <T extends Vm> T getByIdAndUserId(List<T> vmList, int id, int userId) {
         for (T vm : vmList) {
             if (vm.getId() == id && vm.getUserId() == userId) {

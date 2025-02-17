@@ -8,10 +8,8 @@
 
 package org.infrastructureProvider.policies.vm;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import org.customBuilder.factory.ProfileFactory;
 import org.infrastructureProvider.entities.Pe;
 import org.infrastructureProvider.entities.Vm;
 

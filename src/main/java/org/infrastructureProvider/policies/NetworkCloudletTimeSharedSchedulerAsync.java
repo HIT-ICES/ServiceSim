@@ -11,7 +11,7 @@ import java.util.List;
 /*@Todo
  * */
 
-@SuppressWarnings({"unused", "unchecked", "DuplicatedCode"})
+@SuppressWarnings({"unchecked", "DuplicatedCode"})
 public class NetworkCloudletTimeSharedSchedulerAsync extends NetworkCloudletScheduler {
 
     protected List<? extends ResCloudlet> cloudletWaitingList;

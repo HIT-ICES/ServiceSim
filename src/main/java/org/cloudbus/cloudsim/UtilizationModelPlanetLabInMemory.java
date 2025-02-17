@@ -7,7 +7,6 @@ import java.io.IOException;
 /**
  * The Class UtilizationModelPlanetLab.
  */
-@SuppressWarnings("unused")
 public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 
     /**

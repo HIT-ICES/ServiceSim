@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.util.*;
 
 
-@SuppressWarnings({"CommentedOutCode", "unchecked", "unused"})
+@SuppressWarnings({"CommentedOutCode", "unchecked" })
 public class ServiceProvider extends DatacenterBroker {
     private static final Logger logger = LoggerFactory.getLogger(ServiceProvider.class);
 
@@ -505,7 +505,6 @@ public class ServiceProvider extends DatacenterBroker {
         this.devicesProvider = devicesProvider;
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends Vm> List<T> getVmsCreateFailedList() {
         return (List<T>) vmsCreateFailedList;
     }
@@ -520,7 +519,6 @@ public class ServiceProvider extends DatacenterBroker {
         this.vmsCreateFailedList = vmsCreateFailedList;
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends Vm> List<T> getVmsDestroyFailedList() {
         return (List<T>) vmsDestroyFailedList;
     }
@@ -535,7 +533,6 @@ public class ServiceProvider extends DatacenterBroker {
         this.vmsDestroyFailedList = vmsDestroyFailedList;
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends Vm> List<T> getVmsDestroyedList() {
         return (List<T>) vmsDestroyedList;
     }

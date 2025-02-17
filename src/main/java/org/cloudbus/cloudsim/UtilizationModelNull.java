@@ -15,7 +15,6 @@ package org.cloudbus.cloudsim;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 2.0
  */
-@SuppressWarnings("unused")
 public class UtilizationModelNull implements UtilizationModel {
 
     /*

@@ -20,7 +20,6 @@ import java.util.List;
  * @author Thomas Hohnstein
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings("unused")
 public class TopologicalGraph {
 
     private final List<TopologicalLink> linkList;

@@ -177,7 +177,6 @@ public class Host {
      *
      * @param vm the vm
      */
-    @SuppressWarnings("unused")
     public void addMigratingInVm(Vm vm) {
         vm.setInMigration(true);
 

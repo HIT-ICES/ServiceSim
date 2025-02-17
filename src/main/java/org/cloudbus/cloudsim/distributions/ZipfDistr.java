@@ -17,7 +17,6 @@ import java.util.Random;
  * @author Marcos Dias de Assuncao
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings("unused")
 public class ZipfDistr implements ContinuousDistribution {
 
     /**

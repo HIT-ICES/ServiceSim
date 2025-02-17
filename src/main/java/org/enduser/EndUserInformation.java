@@ -1,6 +1,5 @@
 package org.enduser;
 
-@SuppressWarnings("unused")
 public class EndUserInformation {
 
     private int endUserId;
@@ -17,7 +16,6 @@ public class EndUserInformation {
         return endUserId;
     }
 
-    @SuppressWarnings("unused")
     public void setEndUserId(int endUserId) {
         this.endUserId = endUserId;
     }

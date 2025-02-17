@@ -23,7 +23,6 @@ import java.util.Random;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 2.0
  */
-@SuppressWarnings("unused")
 public class UtilizationModelStochastic implements UtilizationModel {
 
     /**

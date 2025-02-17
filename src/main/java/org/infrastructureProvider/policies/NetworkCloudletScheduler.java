@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public abstract class NetworkCloudletScheduler extends CloudletScheduler {
 
     public Map<Integer, List<NetworkPacket>> pktToSend; // cloudletId to networkPackets
@@ -51,7 +50,6 @@ public abstract class NetworkCloudletScheduler extends CloudletScheduler {
      * @param <T>                  the generic type
      * @param cloudletFinishedList the new cloudlet finished list
      */
-    @SuppressWarnings("unused")
     protected <T extends ResCloudlet> void setCloudletFinishedList(List<T> cloudletFinishedList) {
         this.cloudletFinishedList = cloudletFinishedList;
     }

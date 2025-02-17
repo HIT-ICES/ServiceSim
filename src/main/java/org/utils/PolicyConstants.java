@@ -1,13 +1,12 @@
 package org.utils;
 
-@SuppressWarnings({"CommentedOutCode", "unused"})
+@SuppressWarnings({"CommentedOutCode"})
 public class PolicyConstants {
 
     /* cloudlet scheduler policies */
     public final static int SpaceShared = 0;
     public final static int TimeShared = 1;
     public final static int TimeSharedWithLimit = 2;
-    @SuppressWarnings("unused")
     public final static int TimeSharedWithFixShare = 3;
 
     /* vm configuration and purchase policies */

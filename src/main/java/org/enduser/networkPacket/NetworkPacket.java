@@ -3,7 +3,7 @@ package org.enduser.networkPacket;
 import org.enduser.EndUserInformation;
 import org.serviceProvider.services.ServiceChain;
 
-@SuppressWarnings({"CommentedOutCode", "unused"})
+@SuppressWarnings({"CommentedOutCode"})
 public class NetworkPacket {
 
     public int userId; // serviceProvider
@@ -83,7 +83,6 @@ public class NetworkPacket {
         if (remainSize <= 0.0001) remainSize = 0;
     }
 
-    @SuppressWarnings("unused")
     public boolean isCompleted() {
         return remainSize == 0;
     }

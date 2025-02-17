@@ -573,7 +573,7 @@ public class EndUser extends SimEntity {
 
     // CompK8S - 1
     // for testRequest3.py
-    @SuppressWarnings({"unused", "MismatchedQueryAndUpdateOfCollection"})
+    @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection"})
     protected void workloadGeneratorCompK8SForTest3() {
         double currentTime = CloudSim.clock();
         if (currentTime < simLimited) {

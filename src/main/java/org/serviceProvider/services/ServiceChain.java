@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings({"CommentedOutCode", "unused"})
+@SuppressWarnings({"CommentedOutCode"})
 public class ServiceChain {
     private int serviceChainId;
 

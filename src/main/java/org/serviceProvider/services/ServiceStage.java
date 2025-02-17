@@ -1,6 +1,5 @@
 package org.serviceProvider.services;
 
-@SuppressWarnings("unused")
 public class ServiceStage {
     /* stages type */
     public int type;

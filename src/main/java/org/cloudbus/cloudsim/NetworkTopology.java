@@ -30,7 +30,6 @@ import java.util.Map;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings("unused")
 public class NetworkTopology {
 
     protected static int nextIdx = 0;
@@ -48,7 +47,6 @@ public class NetworkTopology {
      * @pre fileName != null
      * @post $none
      */
-    @SuppressWarnings("unused")
     public static void buildNetworkTopology(String fileName) {
         Log.printLine("Topology file: " + fileName);
 

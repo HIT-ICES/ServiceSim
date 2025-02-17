@@ -31,7 +31,6 @@ import java.util.List;
  * @author Rajkumar Buyya
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings("unused")
 public class CloudInformationService extends SimEntity {
 
     /**

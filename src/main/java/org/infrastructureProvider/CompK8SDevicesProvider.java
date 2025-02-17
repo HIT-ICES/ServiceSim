@@ -25,7 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public class CompK8SDevicesProvider extends DevicesProvider {
     private static final Logger logger = LoggerFactory.getLogger(CompK8SDevicesProvider.class);
 

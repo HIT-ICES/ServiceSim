@@ -30,7 +30,7 @@ import java.util.ArrayList;
  * of a super class and/or interface.
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings({"NullableProblems", "unused"})
+@SuppressWarnings({"NullableProblems"})
 public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 
     // appId is not enough. "serviceChainId, endUserId, endUserLevel" for routing.
@@ -40,7 +40,6 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 
     //public double execStartTime; Already in Cloudlet class.
 
-    @SuppressWarnings("unused")
     public double failTime;
 
     /* The time when this Cloudlet completes. */

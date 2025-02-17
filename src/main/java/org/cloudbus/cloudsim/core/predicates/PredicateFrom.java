@@ -19,7 +19,6 @@ import org.cloudbus.cloudsim.core.SimEvent;
  * @see Predicate
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings("unused")
 public class PredicateFrom extends Predicate {
 
     /**

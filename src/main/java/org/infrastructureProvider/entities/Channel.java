@@ -6,7 +6,6 @@ import org.infrastructureProvider.policies.PacketScheduler;
 
 import java.util.List;
 
-@SuppressWarnings("unused")
 public class Channel {
 
     private int from;

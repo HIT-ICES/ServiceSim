@@ -25,7 +25,7 @@ import org.enduser.networkPacket.Cloudlet;
  * @author Rajkumar Buyya
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings({"unused", "UnusedReturnValue"})
+@SuppressWarnings({"UnusedReturnValue"})
 public class ResCloudlet {
 
     /**
@@ -136,7 +136,6 @@ public class ResCloudlet {
      * @post $none
      * @see gridsim.CloudSim#clock()
      */
-    @SuppressWarnings("unused")
     public ResCloudlet(Cloudlet cloudlet, long startTime, int duration, int reserveID) {
         this.cloudlet = cloudlet;
         this.startTime = startTime;

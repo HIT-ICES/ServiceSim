@@ -1,10 +1,6 @@
 package org.customBuilder.factory;
 
-import javax.management.ObjectName;
-
 import org.customBuilder.exception.ParserException;
-
-import com.alibaba.fastjson.JSONObject;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

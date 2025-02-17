@@ -12,7 +12,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public class LeakyBucketForGateway implements LoadAdmission {
     private static final Logger logger = LoggerFactory.getLogger(LeakyBucketForGateway.class);
 

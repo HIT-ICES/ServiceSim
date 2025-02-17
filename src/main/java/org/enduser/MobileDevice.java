@@ -2,7 +2,6 @@ package org.enduser;
 
 import org.utils.Location;
 
-@SuppressWarnings("unused")
 public class MobileDevice {
 
     public int mobileDeviceId;

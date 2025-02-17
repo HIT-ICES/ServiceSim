@@ -25,7 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public class CompAllUpdateDevicesProvider1 extends DevicesProvider {
     private static final Logger logger = LoggerFactory.getLogger(CompAllUpdateDevicesProvider1.class);
 

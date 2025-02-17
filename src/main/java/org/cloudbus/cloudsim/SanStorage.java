@@ -21,7 +21,6 @@ import java.util.List;
  * @author Rodrigo N. Calheiros
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings("unused")
 public class SanStorage extends HarddriveStorage {
 
     /**

@@ -2,7 +2,6 @@ package org.serviceProvider.services;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public abstract class ApplicationServices {
 
     Map<Integer, ServiceChain> serviceChainList;

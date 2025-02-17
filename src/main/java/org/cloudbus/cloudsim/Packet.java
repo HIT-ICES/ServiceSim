@@ -21,7 +21,6 @@ package org.cloudbus.cloudsim;
  * @author Chen-Khong Tham, National University of Singapore
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings("unused")
 public interface Packet {
 
     /**

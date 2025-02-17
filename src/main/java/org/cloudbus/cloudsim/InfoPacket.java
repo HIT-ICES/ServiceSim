@@ -41,7 +41,7 @@ import java.util.Vector;
  * @author Chen-Khong Tham, National University of Singapore
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings({"unused", "UnusedReturnValue"})
+@SuppressWarnings({"UnusedReturnValue"})
 public class InfoPacket implements Packet {
 
     /**

@@ -25,7 +25,6 @@ package org.enduser.networkPacket;
  * @todo Attributes should be defined as private.
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings("unused")
 public class TaskStage {
 
     /**

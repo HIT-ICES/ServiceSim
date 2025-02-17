@@ -67,7 +67,6 @@ public class CloudSim {
     /**
      * The id of CloudSimShutdown entity.
      */
-    @SuppressWarnings("unused")
     private static int shutdownId = -1;
     /**
      * The CIS object.
@@ -76,7 +75,6 @@ public class CloudSim {
     /**
      * The trace flag.
      */
-    @SuppressWarnings("unused")
     private static boolean traceFlag = false;
     /**
      * The calendar.

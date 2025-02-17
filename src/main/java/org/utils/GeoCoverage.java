@@ -3,7 +3,6 @@ package org.utils;
 import com.alibaba.fastjson.JSONObject;
 
 /* iFogSim */
-@SuppressWarnings("unused")
 public class GeoCoverage {
 
     private double lat_l;

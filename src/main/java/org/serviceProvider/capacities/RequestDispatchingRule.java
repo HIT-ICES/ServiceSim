@@ -21,7 +21,6 @@ public abstract class RequestDispatchingRule {
         return networkDevices;
     }
 
-    @SuppressWarnings("unused")
     public void setNetworkDevices(ArrayList<NetworkDevice> networkDevices) {
         this.networkDevices = networkDevices;
     }

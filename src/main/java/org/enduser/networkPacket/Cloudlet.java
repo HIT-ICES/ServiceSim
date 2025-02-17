@@ -24,7 +24,6 @@ import java.util.List;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings("unused")
 public class Cloudlet {
 
     /**

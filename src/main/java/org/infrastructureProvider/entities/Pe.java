@@ -155,7 +155,6 @@ public class Pe {
      * @pre $none
      * @post $none
      */
-    @SuppressWarnings("unused")
     public void setStatusFree() {
         setStatus(FREE);
     }

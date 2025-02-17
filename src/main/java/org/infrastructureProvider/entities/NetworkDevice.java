@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings({ "CommentedOutCode", "unchecked", "unused" })
+@SuppressWarnings({ "CommentedOutCode", "unchecked" })
 public class NetworkDevice extends Datacenter {
 
     /* routing */

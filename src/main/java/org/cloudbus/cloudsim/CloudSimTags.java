@@ -22,7 +22,6 @@ import org.cloudbus.cloudsim.core.CloudSimShutdown;
  * @todo There aren't negative reserved tags, but only positive tags (with 2 exceptions).
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings("unused")
 public class CloudSimTags {
 
     /**

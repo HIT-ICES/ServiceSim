@@ -25,7 +25,7 @@ import java.util.Map.Entry;
  * @author Rodrigo N. Calheiros
  * @since CloudSim Toolkit 3.0
  */
-@SuppressWarnings({"CommentedOutCode", "unused"})
+@SuppressWarnings({"CommentedOutCode"})
 public class VmSchedulerTimeSharedOverSubscription extends VmSchedulerTimeShared {
 
     /**

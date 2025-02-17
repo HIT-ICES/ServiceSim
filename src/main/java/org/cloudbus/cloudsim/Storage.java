@@ -21,7 +21,7 @@ import java.util.List;
  * @author Anthony Sulistio
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings({"unused", "UnusedReturnValue"})
+@SuppressWarnings({"UnusedReturnValue"})
 public interface Storage {
 
     /**
@@ -43,7 +43,6 @@ public interface Storage {
      *
      * @return the current size of the storage in MB
      */
-    @SuppressWarnings("unused")
     double getCurrentSize();
 
     /**

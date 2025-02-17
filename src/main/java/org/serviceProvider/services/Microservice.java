@@ -4,7 +4,6 @@ import org.enduser.networkPacket.NetworkCloudlet;
 
 import java.util.ArrayList;
 
-@SuppressWarnings("unused")
 public class Microservice {
     public int serviceId;
 

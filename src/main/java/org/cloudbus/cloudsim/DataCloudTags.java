@@ -16,7 +16,6 @@ package org.cloudbus.cloudsim;
  * @author Anthony Sulistio
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings("unused")
 public final class DataCloudTags {
 
     /**

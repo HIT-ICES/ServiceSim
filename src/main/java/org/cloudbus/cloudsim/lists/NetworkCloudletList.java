@@ -5,7 +5,6 @@ import org.enduser.networkPacket.NetworkCloudlet;
 import java.util.Comparator;
 import java.util.List;
 
-@SuppressWarnings("unused")
 public class NetworkCloudletList {
     /**
      * Gets the by id.

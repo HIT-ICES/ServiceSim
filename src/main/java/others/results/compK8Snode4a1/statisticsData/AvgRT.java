@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-@SuppressWarnings({"CommentedOutCode", "unused", "SameParameterValue"})
+@SuppressWarnings({"CommentedOutCode", "SameParameterValue"})
 public class AvgRT {
     private static final Logger logger = LoggerFactory.getLogger(AvgRT.class);
 

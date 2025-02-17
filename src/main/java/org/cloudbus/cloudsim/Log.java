@@ -21,7 +21,6 @@ import java.io.OutputStream;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 2.0
  */
-@SuppressWarnings("unused")
 public class Log {
     private static final Logger logger = LoggerFactory.getLogger(Log.class);
 

@@ -23,7 +23,7 @@ import java.util.List;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 1.0
  */
-@SuppressWarnings({"unused", "SameParameterValue"})
+@SuppressWarnings({"SameParameterValue"})
 public class Vm {
 
     /**

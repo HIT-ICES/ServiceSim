@@ -33,7 +33,6 @@ for service placement policy
 public class TestExample2 {
     private static final Logger logger = LoggerFactory.getLogger(TestExample2.class);
 
-    @SuppressWarnings("unused")
     public static void main(String[] args) {
         Log.printLine("Starting ServiceSim Simulation...");
         try {
