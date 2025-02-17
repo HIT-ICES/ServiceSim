@@ -11,6 +11,8 @@ package org.infrastructureProvider.policies.provisioners;
 
 import org.infrastructureProvider.entities.Vm;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * RamProvisioner is an abstract class that represents the provisioning policy of memory to virtual
  * machines inside a Host. When extending this class, care must be taken to guarantee that the field
@@ -42,6 +44,10 @@ public abstract class RamProvisioner {
     public RamProvisioner(int ram) {
         setRam(ram);
         setAvailableRam(ram);
+    }
+
+    public RamProvisioner(JSONObject config) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**

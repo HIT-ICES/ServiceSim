@@ -1,165 +1,20 @@
-
-basic:
-  id: 33eed7a4-5486-4a7c-883b-b2307f9bfce8
-  name: simulation
-providers: 
-  - name: deviceProvider
-    class: devices
-    provider: 
-      name: provider
-      type: builtin
-      path: org.infrastructureProvider.DevicesProviderSimple
-      params: 
-        - name: devices
-          value:
-            - type: builtin
-              path: org.infrastructureProvider.entities.NetworkDevice
-              args:
-                - name: name
-                  value: Datacenter_0
-                - name: characteristics
-                  value:
-                    type: resource
-                    user: test
-                    path: characteristics0.yaml
-                - name: vmAllocationPolicy
-                  value:
-                    type: resource
-                    user: test
-                    path: vmAllocationPolicy0.yaml
-                - name: storageList
-                  value: null
-                - name: schedulingInterval
-                  value: 0
-                - name: location
-                  value:
-                    type: inline
-                    spec:
-                      latitude: -1
-                      longitude: -1
-                      block: -1
-                - name: geoCoverage
-                  value:
-                    type: inline
-                    spec:
-                      lat_l: -1
-                      lat_u: -1
-                      long_l: -1
-                      long_u: -1
-                - name: identify
-                  value: cloud
-                - name: level
-                  value: 3
-            - type: builtin
-              path: org.infrastructureProvider.entities.NetworkDevice
-              args:
-                - name: name
-                  value: Datacenter_1
-                - name: characteristics
-                  value:
-                    type: resource
-                    user: test
-                    path: characteristics1.yaml
-                - name: vmAllocationPolicy
-                  value:
-                    type: resource
-                    user: test
-                    path: vmAllocationPolicy1.yaml
-                - name: storageList
-                  value: null
-                - name: schedulingInterval
-                  value: 0
-                - name: location
-                  value:
-                    type: inline
-                    spec:
-                      latitude: -1
-                      longitude: -1
-                      block: 2
-                - name: geoCoverage
-                  value:
-                    type: inline
-                    spec:
-                      lat_l: -1
-                      lat_u: -1
-                      long_l: -1
-                      long_u: -1
-                - name: identify
-                  value: router
-                - name: level
-                  value: 2
-            - type: builtin
-              path: org.infrastructureProvider.entities.NetworkDevice
-              args:
-                - name: name
-                  value: Datacenter_2
-                - name: characteristics
-                  value:
-                    type: clone
-                    path: .providers[0].provider.params.devices[1].args.characteristics
-                - name: vmAllocationPolicy
-                  value:
-                    type: resource
-                    user: test
-                    path: vmAllocationPolicy2.yaml
-                - name: storageList
-                  value: null
-                - name: schedulingInterval
-                  value: 0
-                - name: location
-                  value:
-                    type: inline
-                    spec:
-                      latitude: -1
-                      longitude: -1
-                      block: 2
-                - name: geoCoverage
-                  value:
-                    type: inline
-                    spec:
-                      lat_l: -1
-                      lat_u: -1
-                      long_l: -1
-                      long_u: -1
-                - name: identify
-                  value: edge
-                - name: level
-                  value: 1
-            - type: builtin
-              path: org.infrastructureProvider.entities.NetworkDevice
-              args:
-                - name: name
-                  value: Datacenter_3
-                - name: characteristics
-                  value:
-                    type: clone
-                    path: .providers[0].provider.params.devices[0].args.characteristics
-                - name: vmAllocationPolicy
-                  value:
-                    type: resource
-                    user: test
-                    path: vmAllocationPolicy3.yaml
-                - name: storageList
-                  value: null
-                - name: schedulingInterval
-                  value: 0
-                - name: location
-                  value:
-                    type: inline
-                    spec:
-                      latitude: -1
-                      longitude: -1
-                      block: 2
-                - name: geoCoverage
-                  value:
-                    type: inline
-                    spec:
-                      lat_l: -1
-                      lat_u: -1
-                      long_l: -1
-                      long_u: -1
-                - name: identify
-                  value: edge
-                - name: level
-                  value: 1
-        - name: channels          
+id: 0
+ramProvisioner: 
+  availableRam: 4096
+bwProvisioner: 
+  bw: 1000
+storage: 1000000
+peList:
+  $type: template
+  $count: 8
+  $ids:
+    - id
+  $template:
+    peProvisioner: 
+      availableMips: 40
+vmScheduler:
+  $type: builtin
+  $path: org.infrastructureProvider.policies.vm.VmSchedulerSpaceShared
+  peList:
+    $type: reference
+    $path: ../peList

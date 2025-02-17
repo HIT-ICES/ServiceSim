@@ -23,9 +23,15 @@ public class Node {
         return childNode.hasChild(node);
     }
 
+    @SuppressWarnings("unused")
     public void addChild(String node) {
         if (childNode == null) {
-            childNode = new ChildNode(NodeType.MAP);
+            try {
+                int index = Integer.parseInt(node);
+                childNode = new ChildNode(NodeType.LIST);
+            } catch (NumberFormatException e) {
+                childNode = new ChildNode(NodeType.MAP);
+            }
         }
         childNode.addChild(node);
     }

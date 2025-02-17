@@ -9,6 +9,8 @@
 package org.infrastructureProvider.entities;
 
 import com.alibaba.fastjson.JSONObject;
+
+import org.customBuilder.factory.ProfileFactory;
 import org.infrastructureProvider.policies.provisioners.PeProvisioner;
 import org.infrastructureProvider.policies.provisioners.PeProvisionerSimple;
 
@@ -73,8 +75,15 @@ public class Pe {
     }
 
     public Pe(JSONObject config){
-        this(config.getInteger("id"),
-                new PeProvisionerSimple(config.getJSONObject("peProvisioner")));
+        ProfileFactory factory = config.getObject("$factory", ProfileFactory.class);
+        int id = config.getIntValue("id");
+        PeProvisioner peProvisioner = (PeProvisioner) factory.getInstance(config, "peProvisioner", PeProvisionerSimple.class);
+
+        setId(id);
+        setPeProvisioner(peProvisioner);
+
+        // when created, it should be set to FREE, i.e., available for use.
+        status = FREE;
     }
 
     /**

@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.lists.PeList;
+import org.customBuilder.factory.ProfileFactory;
 import org.infrastructureProvider.policies.provisioners.BwProvisionerSimple;
 import org.infrastructureProvider.policies.provisioners.RamProvisionerSimple;
 import org.infrastructureProvider.policies.vm.VmScheduler;
@@ -104,20 +105,24 @@ public class Host {
         setFailed(false);
     }
 
-    public Host(JSONObject config)
-    {
-        this(config.getInteger("id"),
-            new RamProvisionerSimple(config.getJSONObject("ramProvisioner")),
-            new BwProvisionerSimple(config.getJSONObject("bwProvisioner")),
-            config.getLong("storage"),
-            new ArrayList<>(),
-            new VmSchedulerSpaceShared(config.getJSONObject("vmScheduler")));
+    @SuppressWarnings("unchecked")
+    public Host(JSONObject config) {
+        ProfileFactory factory = config.getObject("$factory", ProfileFactory.class);
+        int id = config.getIntValue("id");
+        RamProvisioner ramProvisioner = (RamProvisioner) factory.getInstance(config, "ramProvisioner", RamProvisionerSimple.class);
+        BwProvisioner bwProvisioner = (BwProvisioner) factory.getInstance(config, "bwProvisioner", BwProvisionerSimple.class);
+        long storage = config.getLongValue("storage");
+        List<? extends Pe> peList = (List<? extends Pe>) factory.getInstance(config, "peList", Pe.class);
+        VmScheduler vmScheduler = (VmScheduler) factory.getInstance(config, "vmScheduler", VmSchedulerSpaceShared.class);
+        
+        setId(id);
+        setRamProvisioner(ramProvisioner);
+        setBwProvisioner(bwProvisioner);
+        setStorage(storage);
+        setVmScheduler(vmScheduler);
 
-        JSONArray peListArray = config.getJSONArray("peList");
-        for (int i = 0; i < peListArray.size(); i++) {
-            JSONObject peConfig = peListArray.getJSONObject(i);
-            getPeList().add(new Pe(peConfig));
-        }
+        setPeList(peList);
+        setFailed(false);
     }
 
     /**

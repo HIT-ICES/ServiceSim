@@ -39,8 +39,8 @@ public class RamProvisionerSimple extends RamProvisioner {
         setRamTable(new HashMap<>());
     }
 
-    public RamProvisionerSimple(JSONObject config){
-        this(config.getInteger("availableRam"));
+    public RamProvisionerSimple(JSONObject config) {
+        this(config.getIntValue("availableRam"));
     }
 
     /*

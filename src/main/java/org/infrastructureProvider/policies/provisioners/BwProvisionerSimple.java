@@ -39,8 +39,7 @@ public class BwProvisionerSimple extends BwProvisioner {
         setBwTable(new HashMap<>());
     }
 
-    public BwProvisionerSimple(JSONObject config)
-    {
+    public BwProvisionerSimple(JSONObject config) {
         this(config.getLong("bw"));
     }
 

@@ -1,6 +1,8 @@
 package org.customBuilder;
 
 import org.customBuilder.exception.ParserException;
+import org.customBuilder.factory.ProfileFactory;
+import org.infrastructureProvider.entities.Host;
 import org.utils.FileUtilHelper;
 
 import com.alibaba.fastjson.JSONObject;
@@ -31,12 +33,12 @@ public final class ConfigFactory {
         return JSONObject.parseObject(config);
     }
 
-    public static Simulation getSimulation(String path) {
-        return new Simulation(getConfig(path), "");
-    }
-
     public static void main(String[] args) {
-        Simulation simulation = ConfigFactory.getSimulation("template.yaml");
-        System.out.println(simulation);
+        ProfileFactory factory = new ProfileFactory();
+        JSONObject profile = ConfigFactory.getConfig("template.yaml");
+        ProfileFactory.setContext(profile, "");
+        ProfileFactory.setFactory(profile, factory);
+        Host host = new Host(profile);
+        System.out.println(host);
     }
 }

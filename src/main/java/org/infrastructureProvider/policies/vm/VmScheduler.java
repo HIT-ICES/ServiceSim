@@ -9,8 +9,11 @@ package org.infrastructureProvider.policies.vm;
 
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.lists.PeList;
+import org.customBuilder.factory.ProfileFactory;
 import org.infrastructureProvider.entities.Pe;
 import org.infrastructureProvider.entities.Vm;
+
+import com.alibaba.fastjson.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,6 +68,19 @@ public abstract class VmScheduler {
      * @post $none
      */
     public VmScheduler(List<? extends Pe> peList) {
+        setPeList(peList);
+        setPeMap(new HashMap<>());
+        setMipsMap(new HashMap<>());
+        setAvailableMips(PeList.getTotalMips(getPeList()));
+        setVmsMigratingIn(new ArrayList<>());
+        setVmsMigratingOut(new ArrayList<>());
+    }
+
+    @SuppressWarnings("unchecked")
+    public VmScheduler(JSONObject config) {
+        ProfileFactory factory = config.getObject("$factory", ProfileFactory.class);
+        List<? extends Pe> peList = (List<? extends Pe>) factory.getInstance(config, "peList", Pe.class);
+
         setPeList(peList);
         setPeMap(new HashMap<>());
         setMipsMap(new HashMap<>());

@@ -7,11 +7,14 @@ public class BuildTree {
         root = new Node();
     }
 
-    public void add(String context, Object profile, Object instance) {
+    public void set(String context, Object profile, Object instance) {
         String[] nodeList = context.split("\\.");
         Node currentNode = root;
 
         for (String node : nodeList) {
+            if (node.isEmpty()) {
+                continue;
+            }
             // 判断当前节点是否存在
             if (!currentNode.hasChild(node)) {
                 currentNode.addChild(node);
@@ -28,6 +31,9 @@ public class BuildTree {
         Node currentNode = root;
 
         for (String node : nodeList) {
+            if (node.isEmpty()) {
+                continue;
+            }
             if (!currentNode.hasChild(node)) {
                 return null;
             }

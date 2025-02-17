@@ -27,7 +27,7 @@ public class ProfileFactory {
     }
 
     // 获取上下文
-    private static String getContext(JSONObject profile) {
+    public static String getContext(JSONObject profile) {
         String context = profile.getString("$context");
         if (context == null) {
             return "";
@@ -36,13 +36,13 @@ public class ProfileFactory {
     }
 
     // 设置上下文
-    private static void setContext(JSONObject profile, String context) {
+    public static void setContext(JSONObject profile, String context) {
         profile.put("$context", context);
     }
 
     // 获取类型
-    private static BuildType getType(JSONObject profile) {
-        String type = profile.getString("");
+    public static BuildType getType(JSONObject profile) {
+        String type = profile.getString("$type");
         if (type == null) {
             return BuildType.BUILTIN;
         }
@@ -50,7 +50,7 @@ public class ProfileFactory {
     }
 
     // 获取路由
-    private static String getRoute(String context, String ref) {
+    public static String getRoute(String context, String ref) {
         /*
          * /xxx.xxx.xxx 从根节点开始
          * ./xxx.xxx.xxx 与当前节点同级
@@ -68,10 +68,9 @@ public class ProfileFactory {
         } else if (ref.startsWith("../")) {
             // 计算../的数量
             int parentCount = 0;
-            String temp = ref;
-            while (temp.startsWith("../")) {
+            while (ref.startsWith("../")) {
                 parentCount++;
-                temp = temp.substring(3);
+                ref = ref.substring(3);
             }
             String[] contextParts = context.split("\\.");
             if (parentCount > contextParts.length) {
@@ -90,6 +89,11 @@ public class ProfileFactory {
             route = context + "." + ref;
         }
         return route;
+    }
+
+    // 设置工厂
+    public static void setFactory(JSONObject profile, ProfileFactory factory) {
+        profile.put("$factory", factory);
     }
 
     // 从配置文件创建实例
@@ -114,7 +118,13 @@ public class ProfileFactory {
         Object instance = null;
 
         // 注入上下文
-        setContext(profile, context + "." + name);
+        if (name.startsWith("[") && name.endsWith("]")) {
+            setContext(profile, context + name);
+        } else {
+            setContext(profile, context + "." + name);
+        }
+        // 注入工厂
+        setFactory(profile, this);
 
         switch (type) {
             case BUILTIN -> instance = fromBuiltin(profile, context, name, defaultClass);
@@ -129,7 +139,11 @@ public class ProfileFactory {
             }
         }
 
-        buildTree.add(context + "." + name, profile, instance);
+        if (name.startsWith("[") && name.endsWith("]")) {
+            buildTree.set(context + name, profile, instance);
+        } else {
+            buildTree.set(context + "." + name, profile, instance);
+        }
 
         return instance;
     }
@@ -139,17 +153,17 @@ public class ProfileFactory {
         List<Object> instances = new ArrayList<>();
         for (int i = 0; i < profile.size(); i++) {
             JSONObject child = profile.getJSONObject(i);
-            instances.add(fromJSONObject(child, context + "[" + i + "]", name, defaultClass));
+            instances.add(fromJSONObject(child, context + "." + name, "[" + i + "]", defaultClass));
         }
 
-        buildTree.add(context + "." + name, profile, instances);
+        buildTree.set(context + "." + name, profile, instances);
 
         return instances;
     }
 
     // java内部类
     private Object fromBuiltin(JSONObject profile, String context, String name, Class<?> defaultClass) {
-        String className = profile.getString("");
+        String className = profile.getString("$path");
         Class<?> clazz = null;
 
         // 获取类
@@ -218,12 +232,15 @@ public class ProfileFactory {
 
     // 模板文件
     private Object fromTemplate(JSONObject profile, String context, String name, Class<?> defaultClass) {
-        Integer num = profile.getInteger("$num");
+        int count = profile.getIntValue("$count");
         JSONObject template = profile.getJSONObject("$template");
         JSONArray ids = profile.getJSONArray("$ids");
         String idType = profile.getString("$idType");
+        if (idType == null) {
+            idType = "auto";
+        }
         List<Object> instances = new ArrayList<>();
-        for (int i = 0; i < num; i++) {
+        for (int i = 0; i < count; i++) {
             JSONObject child = (JSONObject) template.clone();
             if (ids != null) {
                 switch (idType) {
@@ -244,11 +261,8 @@ public class ProfileFactory {
                     }
                 }
             }
-            instances.add(fromJSONObject(child, context + "[" + i + "]", name, defaultClass));
+            instances.add(fromJSONObject(child, context + "." + name, "[" + i + "]", defaultClass));
         }
-
-        buildTree.add(context + "." + name, profile, instances);
-
         return instances;
     }
 
@@ -283,16 +297,18 @@ public class ProfileFactory {
             logger.error("无法获取克隆对象配置: {}, 位于: {}", clone, context + "." + name);
             throw new IllegalArgumentException("无法获取克隆对象配置: " + clone);
         }
+        Object instance = null;
         if (cloneProfile instanceof JSONObject) {
             JSONObject cloneProfileObject = (JSONObject) cloneProfile;
-            return fromJSONObject(cloneProfileObject, context, name, defaultClass);
+            instance = fromJSONObject(cloneProfileObject, context, name, defaultClass);
         } else if (cloneProfile instanceof JSONArray) {
             JSONArray cloneProfileArray = (JSONArray) cloneProfile;
-            return fromJSONArray(cloneProfileArray, context, name, defaultClass);
+            instance = fromJSONArray(cloneProfileArray, context, name, defaultClass);
         } else {
             logger.error("克隆对象不是JSONObject或JSONArray: {}, 位于: {}", clone, context + "." + name);
             throw new IllegalArgumentException("克隆对象不是JSONObject或JSONArray: " + clone);
         }
+        return instance;
     }
 }
 
