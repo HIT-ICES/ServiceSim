@@ -320,7 +320,7 @@ public class ProfileFactory {
     }
 
     // 克隆
-    public Object fromClone(JSONObject profile, String context, String name, Class<?> defaultClass) {
+    private Object fromClone(JSONObject profile, String context, String name, Class<?> defaultClass) {
         String clone = profile.getString("$path");
         String route = getRoute(context, clone);
         Node node = buildTree.get(route);
