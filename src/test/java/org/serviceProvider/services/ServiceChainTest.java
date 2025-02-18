@@ -1,4 +1,4 @@
-package org.utils;
+package org.serviceProvider.services;
 
 import com.alibaba.fastjson.JSONObject;
 import org.customBuilder.ConfigFactory;
@@ -7,13 +7,13 @@ import org.junit.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class LocationTest {
+public class ServiceChainTest {
     @Test
     public void testConstructorWithConfig() {
-        JSONObject config = ConfigFactory.getUserConfig("LoadTest", "LocationTest.yaml");
+        JSONObject config = ConfigFactory.getUserConfig("LoadTest", "ServiceChainTest.yaml");
         new ProfileFactory(config);
-        Location location = new Location(config);
-        assertNotNull(location);
-        System.out.println(location);
+        ServiceChain serviceChain = new ServiceChain(config);
+        assertNotNull(serviceChain);
+        System.out.println(serviceChain);
     }
 }

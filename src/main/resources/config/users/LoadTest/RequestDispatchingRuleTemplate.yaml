@@ -1,0 +1,12 @@
+$scope: all
+$strategy: org.serviceProvider.capacities.RequestDispatchingSimple
+info: # 映射：device的id -> {多个device的id}
+  0:
+    - 0
+    - 1
+  1:
+    - 1
+  2:
+    - 2
+  3:
+    - 3

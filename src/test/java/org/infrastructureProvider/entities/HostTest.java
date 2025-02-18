@@ -5,13 +5,12 @@ import org.customBuilder.ConfigFactory;
 import org.customBuilder.factory.ProfileFactory;
 import org.junit.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class HostTest {
     @Test
-    public void testConstructorWithConfig()
-    {
-        JSONObject config = ConfigFactory.getUserConfig("LoadTest","HostTest.yaml");
+    public void testConstructorWithConfig() {
+        JSONObject config = ConfigFactory.getUserConfig("LoadTest", "HostTest.yaml");
         new ProfileFactory(config);
         Host host = new Host(config);
         assertNotNull(host);

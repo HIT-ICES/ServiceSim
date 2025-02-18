@@ -5,13 +5,12 @@ import org.customBuilder.ConfigFactory;
 import org.customBuilder.factory.ProfileFactory;
 import org.junit.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class PeProvisionerSimpleTest
-{
+public class PeProvisionerSimpleTest {
     @Test
-    public void testConstructorWithConfig(){
-        JSONObject config = ConfigFactory.getUserConfig("LoadTest","PeProvisionerSimpleTest.yaml");
+    public void testConstructorWithConfig() {
+        JSONObject config = ConfigFactory.getUserConfig("LoadTest", "PeProvisionerSimpleTest.yaml");
         PeProvisionerSimple peProvisioner = new PeProvisionerSimple(config);
         ProfileFactory profileFactory = new ProfileFactory(config);
         assertNotNull(peProvisioner);

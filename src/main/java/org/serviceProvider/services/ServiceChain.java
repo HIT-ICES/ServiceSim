@@ -1,5 +1,8 @@
 package org.serviceProvider.services;
 
+import com.alibaba.fastjson.JSONObject;
+import org.customBuilder.factory.ProfileFactory;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +34,17 @@ public class ServiceChain {
 
     public ServiceChain(int serviceChainId) {
         this.serviceChainId = serviceChainId;
+        microserviceIds = new ArrayList<>();
+        cloudletLengthList = new HashMap<>();
+        pesNumberList = new HashMap<>();
+        memList = new HashMap<>();
+        //serviceStageMap = new HashMap<>();
+        serviceStagesMap = new HashMap<>();
+    }
+
+    public ServiceChain(JSONObject config){
+        ProfileFactory factory = config.getObject("$factory", ProfileFactory.class);
+        this.serviceChainId = config.getInteger("id");
         microserviceIds = new ArrayList<>();
         cloudletLengthList = new HashMap<>();
         pesNumberList = new HashMap<>();

@@ -1,5 +1,6 @@
 package org.serviceProvider;
 
+import com.alibaba.fastjson.JSONObject;
 import javafx.util.Pair;
 import org.cloudbus.cloudsim.CloudSimTags;
 import org.cloudbus.cloudsim.Log;
@@ -7,6 +8,8 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
 import org.cloudbus.cloudsim.lists.VmList;
+import org.customBuilder.ConfigFactory;
+import org.customBuilder.factory.ProfileFactory;
 import org.enduser.networkPacket.NetworkCloudlet;
 import org.enduser.networkPacket.NetworkPacket;
 import org.enduser.networkPacket.TaskStage;
@@ -86,6 +89,42 @@ public class ServiceProvider extends DatacenterBroker {
         this.cloudletExeDetailFile = cloudletResultFile[1];
         this.cloudletStageDetailFile = cloudletResultFile[2];
 
+    }
+
+    @SuppressWarnings("unchecked")
+    public ServiceProvider(JSONObject config){
+        super(config.getString("name"));
+
+        ProfileFactory factory = config.getObject("$factory", ProfileFactory.class);
+
+        List<ServiceChain> serviceChain = (List<ServiceChain>) factory.getInstance(config,"serviceChain",ServiceChain.class);
+        DevicesProvider devicesProvider = (DevicesProvider) factory.getInstance(config,"devicesProvider",DevicesProvider.class);
+        Map<Integer, LoadAdmission> initLoadAdmission = factory.getLoadAdmission(config.getJSONObject("loadAdmission"));
+        Map<Integer, LoadBalance> initLoadBalance = factory.getLoadBalance(config.getJSONObject("loadBalance"));
+        Map<Integer, RequestDispatchingRule> initRequestDispatching = factory.getRequestDispatchingRule(config.getJSONObject("requestDispatchingRule"));
+        Map<Integer, Map<Integer, Map<Integer, Integer>>> initInstance = factory.getEmploymentInfo(config.getJSONObject("employmentInfo"));
+
+        int experimentNum = factory.getExperimentNum();
+        String workloadResult = "src//others//results//workloadResult" + experimentNum + ".csv";
+        String cloudletExeDetail = "src//others//results//cloudletExeDetail" + experimentNum + ".csv";
+        String cloudletStageDetail = "src//others//results//cloudletStagesDetail" + experimentNum + ".csv";
+        String[] cloudletResultFile = new String[]{workloadResult, cloudletExeDetail, cloudletStageDetail};
+
+        this.serviceChain = serviceChain;
+        this.devicesProvider = devicesProvider;
+
+        setVmsCreateFailedList(new ArrayList<>());
+        setVmsDestroyFailedList(new ArrayList<>());
+        setVmsDestroyedList(new ArrayList<>());
+
+        endUserRequest = new HashMap<>();
+
+        initExecutorDeployment(initLoadAdmission, initLoadBalance, initRequestDispatching);
+        this.initInstance = initInstance;
+
+        this.appCloudletResultFile = cloudletResultFile[0];
+        this.cloudletExeDetailFile = cloudletResultFile[1];
+        this.cloudletStageDetailFile = cloudletResultFile[2];
     }
 
     @Override

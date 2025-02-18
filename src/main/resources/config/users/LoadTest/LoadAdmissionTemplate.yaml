@@ -1,0 +1,3 @@
+# 映射为id->策略，而id未知，目前只支持all
+$scope: all
+$strategy: org.serviceProvider.capacities.NonLoadAdmission

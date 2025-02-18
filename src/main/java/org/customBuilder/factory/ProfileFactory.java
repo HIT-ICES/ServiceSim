@@ -2,11 +2,14 @@ package org.customBuilder.factory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import org.customBuilder.ConfigFactory;
+import org.infrastructureProvider.DevicesProvider;
+import org.infrastructureProvider.entities.NetworkDevice;
+import org.serviceProvider.capacities.LoadAdmission;
+import org.serviceProvider.capacities.LoadBalance;
+import org.serviceProvider.capacities.RequestDispatchingRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.utils.FileUtilHelper;
@@ -21,9 +24,12 @@ public class ProfileFactory {
     private static final Logger logger = LoggerFactory.getLogger(ProfileFactory.class);
 
     private BuildTree buildTree;
+    private JSONObject config;
+    private final int experimentNum;
 
     public ProfileFactory() {
         buildTree = new BuildTree();
+        experimentNum = 0;
     }
 
     /**
@@ -33,8 +39,23 @@ public class ProfileFactory {
      */
     public ProfileFactory(JSONObject config) {
         buildTree = new BuildTree();
+        this.config = config;
+        if(config.getInteger("experimentNum")!=null){
+            experimentNum = config.getInteger("experimentNum");
+        }
+        else{
+            experimentNum = 0;
+        }
         ProfileFactory.setContext(config, "");
         ProfileFactory.setFactory(config, this);
+    }
+
+    /**
+     * 获取本次模拟序号
+     * @return 本次模拟序号
+     */
+    public int getExperimentNum(){
+        return experimentNum;
     }
 
     /**
@@ -147,6 +168,170 @@ public class ProfileFactory {
         return instance;
     }
 
+    /**
+     * 读取配置，获取LoadAdmission策略
+     * @param profile 配置信息
+     * @return LoadAdmission策略
+     */
+    public Map<Integer, LoadAdmission> getLoadAdmission(JSONObject profile){
+        // 若是resource，则读取
+        if(profile.getString("$type").equals("resource")){
+            String user = profile.getString("$user");
+            String path = profile.getString("$path");
+            profile = ConfigFactory.getUserConfig(user,path);
+        }
+
+        Class<?> clazz = null;
+        Constructor<?> constructor = null;
+        try {
+            String className = profile.getString("$strategy");
+            clazz = Class.forName(className);
+            constructor = clazz.getConstructor();
+        } catch (Exception e) {
+            logger.error("LoadAdmission无法获取指定类");
+            throw new RuntimeException(e);
+        }
+
+        Map<Integer,LoadAdmission> initLoadAdmission = new HashMap<>();
+        // all 则全部设置为同一策略
+        // TODO:这里可能移除对All的判断
+        if(profile.getString("$scope").equals("all")){
+            DevicesProvider devicesProvider = (DevicesProvider) buildTree.get("DevicesProvider").getInstance();
+            for(NetworkDevice device : devicesProvider.getDevices()){
+                try
+                {
+                    initLoadAdmission.put(device.getId(),(LoadAdmission) constructor.newInstance());
+                } catch (Exception e)
+                {
+                    logger.error("LoadAdmission实例构建错误:"+clazz.getName());
+                    throw new RuntimeException(e);
+                }
+            }
+            return initLoadAdmission;
+        }
+        return null;
+    }
+
+    /**
+     * 读取配置，获取LoadBalance策略
+     * @param profile 配置信息
+     * @return LoadBalance策略
+     */
+    public Map<Integer, LoadBalance> getLoadBalance(JSONObject profile) {
+        // 若是resource，则读取
+        if ("resource".equals(profile.getString("$type"))) {
+            String user = profile.getString("$user");
+            String path = profile.getString("$path");
+            profile = ConfigFactory.getUserConfig(user, path);
+        }
+
+        Class<?> clazz = null;
+        Constructor<?> constructor = null;
+        try {
+            String className = profile.getString("$strategy");
+            clazz = Class.forName(className);
+            constructor = clazz.getConstructor();
+        } catch (Exception e) {
+            logger.error("LoadBalance无法获取指定类");
+            throw new RuntimeException(e);
+        }
+
+        Map<Integer, LoadBalance> initLoadBalance = new HashMap<>();
+        // all 则全部设置为同一策略
+        // TODO:这里可能移除对All的判断
+        if ("all".equals(profile.getString("$scope"))) {
+            DevicesProvider devicesProvider = (DevicesProvider) buildTree.get("DevicesProvider").getInstance();
+            for (NetworkDevice device : devicesProvider.getDevices()) {
+                try {
+                    initLoadBalance.put(device.getId(), (LoadBalance) constructor.newInstance());
+                } catch (Exception e) {
+                    logger.error("LoadBalance实例构建错误:" + clazz.getName());
+                    throw new RuntimeException(e);
+                }
+            }
+            return initLoadBalance;
+        }
+        return null;
+    }
+
+    /**
+     * 读取配置，获取RequestDispatchingRule
+     * @param profile 配置信息
+     * @return RequestDispatchingRule策略
+     */
+    public Map<Integer, RequestDispatchingRule> getRequestDispatchingRule(JSONObject profile) {
+        // 若是resource，则读取
+        if ("resource".equals(profile.getString("$type"))) {
+            String user = profile.getString("$user");
+            String path = profile.getString("$path");
+            profile = ConfigFactory.getUserConfig(user, path);
+        }
+
+        // TODO:这里可能移除对All的判断
+        if(!"all".equals(profile.getString("$scope"))){return null;}
+
+        Class<?> clazz = null;
+        Constructor<?> constructor = null;
+        try {
+            String className = profile.getString("$strategy");
+            clazz = Class.forName(className);
+            constructor = clazz.getConstructor(ArrayList.class);
+        } catch (Exception e) {
+            logger.error("RuquestDispatchingRule无法获取指定类");
+            throw new RuntimeException(e);
+        }
+
+        JSONObject info = profile.getJSONObject("info");
+        DevicesProvider devicesProvider = (DevicesProvider) buildTree.get("DevicesProvider").getInstance();
+        Map<Integer,RequestDispatchingRule> initRequestDispatchingRule = new HashMap<>();
+
+        // 遍历info字段
+        for (String key : info.keySet()) {
+            int index = Integer.parseInt(key);
+            JSONArray values = info.getJSONArray(key);
+            ArrayList<NetworkDevice> networkDevices = new ArrayList<>();
+
+            for (int i = 0; i < values.size(); i++) {
+                networkDevices.add(devicesProvider.getDevices().get(values.getInteger(i)));
+            }
+            // 将结果放入Map中
+            try
+            {
+                initRequestDispatchingRule.put(devicesProvider.getDevices().get(index).getId(),
+                        (RequestDispatchingRule) constructor.newInstance(networkDevices));
+            } catch (Exception e)
+            {
+                logger.error("RuquestDispatchingRule实例构建错误:"+clazz.getName());
+                throw new RuntimeException(e);
+            }
+        }
+        return initRequestDispatchingRule;
+    }
+
+    /**
+     * 获取服务部署信息
+     * 对应于TestExample中的getIntegerMapMap
+     * @param profile 配置信息
+     * @return 服务部署信息
+     */
+    public Map<Integer, Map<Integer, Map<Integer, Integer>>> getEmploymentInfo(JSONObject profile) {
+        // 若是resource，则读取
+        if ("resource".equals(profile.getString("$type"))) {
+            String user = profile.getString("$user");
+            String path = profile.getString("$path");
+            profile = ConfigFactory.getUserConfig(user, path);
+        }
+
+        profile = profile.getJSONObject("info");
+
+        Map<Integer, Map<Integer, Map<Integer, Integer>>> resultMap = new HashMap<>();
+
+        Set<String> k1 = profile.keySet();
+
+        return resultMap;
+    }
+
+
     // 从JSONObject中获取实例
     private Object fromJSONObject(JSONObject profile, String context, String name, Class<?> defaultClass) {
         BuildType type = getType(profile);
@@ -237,7 +422,9 @@ public class ProfileFactory {
             logger.error("参数错误: {}, 位于: {}", clazz.getName(), nowContext);
             throw new IllegalArgumentException("参数错误: " + clazz.getName());
         } catch (InvocationTargetException e) {
-            logger.error("调用目标错误: {}, 位于: {}", clazz.getName(), nowContext);
+//            logger.error("调用目标错误: {}, 位于: {}", clazz.getName(), nowContext);
+            Throwable cause = e.getCause();
+            e.printStackTrace();
             throw new IllegalArgumentException("调用目标错误: " + clazz.getName());
         }
     }

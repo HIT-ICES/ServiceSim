@@ -2,6 +2,7 @@ package org.infrastructureProvider;
 
 import com.alibaba.fastjson.JSONObject;
 import org.cloudbus.cloudsim.Storage;
+import org.customBuilder.factory.ProfileFactory;
 import org.infrastructureProvider.entities.*;
 import org.infrastructureProvider.policies.PacketSchedulerTimeShared;
 import org.infrastructureProvider.policies.ShortestPathRoutingGenerator;
@@ -27,10 +28,10 @@ public class DevicesProviderSimple extends DevicesProvider {
         super();
     }
 
-    public DevicesProviderSimple(JSONObject config)
-    {
+    public DevicesProviderSimple(JSONObject config){
         super(config);
     }
+
 
     @Override
     public void createDevices() {

@@ -5,14 +5,12 @@ import org.customBuilder.ConfigFactory;
 import org.customBuilder.factory.ProfileFactory;
 import org.junit.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class DatacenterCharacteristicsTest
-{
+public class DatacenterCharacteristicsTest {
     @Test
-    public void testConstructorWithConfig()
-    {
-        JSONObject config = ConfigFactory.getUserConfig("LoadTest","DatacenterCharacteristicsTest.yaml");
+    public void testConstructorWithConfig() {
+        JSONObject config = ConfigFactory.getUserConfig("LoadTest", "DatacenterCharacteristicsTest.yaml");
         ProfileFactory profileFactory = new ProfileFactory(config);
         DatacenterCharacteristics characteristics = new DatacenterCharacteristics(config);
         assertNotNull(characteristics);

@@ -36,7 +36,7 @@ public final class ConfigFactory {
 
     public static void main(String[] args) {
         JSONObject config = ConfigFactory.getUserConfig("LoadTest","DevicesProviderSimpleTest.yaml");
-        new ProfileFactory(config);
+        ProfileFactory factory = new ProfileFactory(config);
         DevicesProvider devicesProvider = new DevicesProviderSimple(config);
         System.out.println(devicesProvider);
     }

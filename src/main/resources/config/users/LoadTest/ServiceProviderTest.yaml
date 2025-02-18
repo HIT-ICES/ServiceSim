@@ -1,0 +1,9 @@
+experimentNum: 1
+DevicesProvider:
+  $type: resource
+  $user: LoadTest
+  $path: DevicesProviderSimpleTest.yaml
+ServiceProvider:
+  $type: resource
+  $user: LoadTest
+  $path: ServiceProviderTemplate.yaml

@@ -1,0 +1,23 @@
+name: ServiceProvider
+serviceChain:
+  - id: 1
+  - id: 2
+devicesProvider:
+  $type: reference
+  $path: /DevicesProvider
+loadAdmission:
+  $type: resource
+  $user: LoadTest
+  $path: LoadAdmissionTemplate.yaml
+loadBalance:
+  $type: resource
+  $user: LoadTest
+  $path: LoadBalanceTemplate.yaml
+requestDispatchingRule:
+  $type: resource
+  $user: LoadTest
+  $path: RequestDispatchingRuleTemplate.yaml
+employmentInfo:
+  $type: resource
+  $user: LoadTest
+  $path: EmploymentInfoTemplate.yaml
