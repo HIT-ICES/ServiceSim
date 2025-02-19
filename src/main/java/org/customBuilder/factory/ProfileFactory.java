@@ -326,7 +326,24 @@ public class ProfileFactory {
 
         Map<Integer, Map<Integer, Map<Integer, Integer>>> resultMap = new HashMap<>();
 
-        Set<String> k1 = profile.keySet();
+        //遍历info，读取配置
+        for(String k1 : profile.keySet()){
+            int i1 = Integer.parseInt(k1);
+            JSONObject j1 = profile.getJSONObject(k1);
+            Map<Integer, Map<Integer, Integer>> m1 = new HashMap<>();
+            for(String k2 : j1.keySet()){
+                int i2 = Integer.parseInt(k2);
+                JSONObject j2 = j1.getJSONObject(k2);
+                Map<Integer,Integer> m2 = new HashMap<>();
+                for(String k3 : j2.keySet()){
+                    int i3 = Integer.parseInt(k3);
+                    int value = j2.getInteger(k3);
+                    m2.put(i3,value);
+                }
+                m1.put(i2,m2);
+            }
+            resultMap.put(i1,m1);
+        }
 
         return resultMap;
     }
