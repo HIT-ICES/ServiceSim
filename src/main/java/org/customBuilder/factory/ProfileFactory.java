@@ -175,7 +175,7 @@ public class ProfileFactory {
      */
     public Map<Integer, LoadAdmission> getLoadAdmission(JSONObject profile){
         // 若是resource，则读取
-        if(profile.getString("$type").equals("resource")){
+        if(getType(profile)==BuildType.RESOURCE){
             String user = profile.getString("$user");
             String path = profile.getString("$path");
             profile = ConfigFactory.getUserConfig(user,path);
@@ -195,7 +195,7 @@ public class ProfileFactory {
         Map<Integer,LoadAdmission> initLoadAdmission = new HashMap<>();
         // all 则全部设置为同一策略
         // TODO:这里可能移除对All的判断
-        if(profile.getString("$scope").equals("all")){
+        if("all".equals(profile.getString("$scope"))){
             DevicesProvider devicesProvider = (DevicesProvider) buildTree.get("DevicesProvider").getInstance();
             for(NetworkDevice device : devicesProvider.getDevices()){
                 try
@@ -219,7 +219,7 @@ public class ProfileFactory {
      */
     public Map<Integer, LoadBalance> getLoadBalance(JSONObject profile) {
         // 若是resource，则读取
-        if ("resource".equals(profile.getString("$type"))) {
+        if (getType(profile)==BuildType.RESOURCE) {
             String user = profile.getString("$user");
             String path = profile.getString("$path");
             profile = ConfigFactory.getUserConfig(user, path);
@@ -261,7 +261,7 @@ public class ProfileFactory {
      */
     public Map<Integer, RequestDispatchingRule> getRequestDispatchingRule(JSONObject profile) {
         // 若是resource，则读取
-        if ("resource".equals(profile.getString("$type"))) {
+        if (getType(profile)==BuildType.RESOURCE) {
             String user = profile.getString("$user");
             String path = profile.getString("$path");
             profile = ConfigFactory.getUserConfig(user, path);
@@ -316,7 +316,7 @@ public class ProfileFactory {
      */
     public Map<Integer, Map<Integer, Map<Integer, Integer>>> getEmploymentInfo(JSONObject profile) {
         // 若是resource，则读取
-        if ("resource".equals(profile.getString("$type"))) {
+        if (getType(profile)==BuildType.RESOURCE) {
             String user = profile.getString("$user");
             String path = profile.getString("$path");
             profile = ConfigFactory.getUserConfig(user, path);
