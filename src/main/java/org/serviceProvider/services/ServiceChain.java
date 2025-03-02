@@ -1,10 +1,13 @@
 package org.serviceProvider.services;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.customBuilder.factory.ProfileFactory;
+import org.enduser.networkPacket.NetworkConstants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings({"CommentedOutCode"})
@@ -50,7 +53,35 @@ public class ServiceChain {
         pesNumberList = new HashMap<>();
         memList = new HashMap<>();
         //serviceStageMap = new HashMap<>();
-        serviceStagesMap = new HashMap<>();
+        serviceStagesMap = new HashMap<>();//服务id->前置服务id->服务阶段
+
+        //下面读取ServiceChain的配置
+        JSONArray microservices = config.getJSONArray("Microservices");
+        for(int i = 0; i < microservices.size(); i++){
+            // 每个微服务的基本配置
+            JSONObject microservice = microservices.getJSONObject(i);
+            int serviceId = microservice.getInteger("serviceId");
+            microserviceIds.add(serviceId);
+            cloudletLengthList.put(serviceId, microservice.getDouble("cloudletLength"));
+            pesNumberList.put(serviceId, microservice.getInteger("pesNumber"));
+            memList.put(serviceId, microservice.getInteger("mem"));
+            int preServiceId = microservice.getInteger("preServiceId");
+            Map<Integer, ArrayList<ServiceStage>> preToStagesMap = new HashMap<>();
+            // 下面读取该微服务的服务阶段信息
+            JSONArray stages = microservice.getJSONArray("serviceStages");
+            ArrayList<ServiceStage> serviceStages = new ArrayList<>();
+            for(int j = 0; j < stages.size(); j++){
+                JSONObject stage = stages.getJSONObject(j);
+                int type = NetworkConstants.getValueByType(stage.getString("type"));
+                int peer = stage.getInteger("peer");
+                double stageCloudletLength = stage.getDouble("stageCloudletLength");
+                double data = stage.getDouble("data");
+                serviceStages.add(new ServiceStage(j, type, peer, stageCloudletLength, data)); // 默认id从0开始
+            }
+            // 构建映射：服务id->前置服务id->服务阶段
+            preToStagesMap.put(preServiceId,serviceStages);
+            serviceStagesMap.put(serviceId,preToStagesMap);
+        }
     }
 
     public int getServiceChainId() {

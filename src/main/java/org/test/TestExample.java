@@ -164,7 +164,7 @@ public class TestExample {
         //serviceChain1.getServiceStageMap().put(0,Service0Stages);
 
         Map<Integer, ArrayList<ServiceStage>> service0Stages = new HashMap<>();
-        service0Stages.put(-1, Service0Stages);
+        service0Stages.put(-1, Service0Stages); // -1表示无前置服务 也就是本服务是初始化服务0
         serviceChain1.getServiceStagesMap().put(0, service0Stages);
 
         ArrayList<ServiceStage> Service1Stages = new ArrayList<>();
@@ -179,8 +179,8 @@ public class TestExample {
         //serviceChain1.getServiceStageMap().put(1,Service1Stages);
 
         Map<Integer, ArrayList<ServiceStage>> service1Stages = new HashMap<>();
-        service1Stages.put(0, Service1Stages);
-        serviceChain1.getServiceStagesMap().put(1, service1Stages);
+        service1Stages.put(0, Service1Stages); // 0是前置服务的id
+        serviceChain1.getServiceStagesMap().put(1, service1Stages); // 服务的id
 
 
         /* service2 stage */

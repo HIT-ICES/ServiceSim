@@ -1,1 +1,78 @@
-id: 1
+id: 0
+Microservices:
+  - serviceId: 0
+    preServiceId: -1
+    cloudletLength: 0
+    pesNumber: 1
+    mem: 10
+    serviceStages:
+      - type: WAIT_SEND
+        peer: 1
+        stageCloudletLength: 0
+        data: 1000
+      - type: WAIT_RECV
+        peer: 1
+        stageCloudletLength: 0
+        data: 1000
+  - serviceId: 1
+    preServiceId: 0
+    cloudletLength: 0.4
+    pesNumber: 1
+    mem: 100
+    serviceStages:
+      - type: EXECUTION
+        peer: 1
+        stageCloudletLength: 0.2
+        data: 0
+      - type: WAIT_SEND
+        peer: 2
+        stageCloudletLength: 0
+        data: 1000
+      - type: WAIT_SEND
+        peer: 3
+        stageCloudletLength: 0
+        data: 1000
+      - type: WAIT_RECV
+        peer: 2
+        stageCloudletLength: 0
+        data: 1000
+      - type: WAIT_RECV
+        peer: 3
+        stageCloudletLength: 0
+        data: 1000
+      - type: EXECUTION
+        peer: 1
+        stageCloudletLength: 0.2
+        data: 0
+      - type: WAIT_SEND
+        peer: 0
+        stageCloudletLength: 0
+        data: 1000
+  - serviceId: 2
+    preServiceId: 1
+    cloudletLength: 0.4
+    pesNumber: 1
+    mem: 100
+    serviceStages:
+      - type: EXECUTION
+        peer: 2
+        stageCloudletLength: 0.4
+        data: 0
+      - type: WAIT_SEND
+        peer: 1
+        stageCloudletLength: 0
+        data: 1000
+  - serviceId: 3
+    preServiceId: 1
+    cloudletLength: 0.4
+    pesNumber: 1
+    mem: 100
+    serviceStages:
+      - type: EXECUTION
+        peer: 3
+        stageCloudletLength: 0.4
+        data: 0
+      - type: WAIT_SEND
+        peer: 1
+        stageCloudletLength: 0
+        data: 1000

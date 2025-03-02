@@ -17,5 +17,6 @@ public class ServiceProviderTest {
         ServiceProvider serviceProvider = (ServiceProvider) factory.getInstance(config, "ServiceProvider", ServiceProvider.class);
         assertNotNull(serviceProvider);
         System.out.println(serviceProvider);
+        System.out.println(serviceProvider.getServiceChain().getFirst().getServiceStagesMap());
     }
 }
