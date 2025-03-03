@@ -10,6 +10,9 @@ import org.infrastructureProvider.entities.NetworkDevice;
 import org.serviceProvider.capacities.LoadAdmission;
 import org.serviceProvider.capacities.LoadBalance;
 import org.serviceProvider.capacities.RequestDispatchingRule;
+import org.serviceProvider.capacities.RequestDispatchingSimple;
+import org.serviceProvider.services.ApplicationServices;
+import org.serviceProvider.services.ServiceChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.utils.FileUtilHelper;
@@ -281,10 +284,18 @@ public class ProfileFactory {
             throw new RuntimeException(e);
         }
 
-        JSONObject info = profile.getJSONObject("info");
         DevicesProvider devicesProvider = (DevicesProvider) buildTree.get("DevicesProvider").getInstance();
         Map<Integer,RequestDispatchingRule> initRequestDispatchingRule = new HashMap<>();
 
+        // 判断type 若为full 则为Full collaboration
+        if(profile.containsKey("$type") && profile.getString("$type").equals("full")){
+            for (NetworkDevice device : devicesProvider.getDevices()) {
+                initRequestDispatchingRule.put(device.getId(), new RequestDispatchingSimple((ArrayList<NetworkDevice>) devicesProvider.getDevices()));
+            }
+            return initRequestDispatchingRule;
+        }
+
+        JSONObject info = profile.getJSONObject("info");
         // 遍历info字段
         for (String key : info.keySet()) {
             int index = Integer.parseInt(key);
@@ -322,11 +333,24 @@ public class ProfileFactory {
             profile = ConfigFactory.getUserConfig(user, path);
         }
 
-        profile = profile.getJSONObject("info");
-
         Map<Integer, Map<Integer, Map<Integer, Integer>>> resultMap = new HashMap<>();
 
+        // 判断strategy
+        if(profile.containsKey("$strategy") && profile.getString("$strategy").equals("random")){
+            int smallBS = profile.getInteger("smallBS");
+            profile = profile.getJSONObject("info");
+            Map<Integer, Integer> serviceToInstanceNum = new HashMap<>();
+            for(String k : profile.keySet()){
+                int serviceId = Integer.parseInt(k);
+                int instanceNum = Integer.parseInt(profile.getString(k));
+                serviceToInstanceNum.put(serviceId, instanceNum);
+            }
+            DevicesProvider devicesProvider = (DevicesProvider) buildTree.get("DevicesProvider").getInstance();
+            return getRandomEmploymentInfo(serviceToInstanceNum,devicesProvider.getDevices(),smallBS);
+        }
+
         //遍历info，读取配置
+        profile = profile.getJSONObject("info");
         for(String k1 : profile.keySet()){
             int i1 = Integer.parseInt(k1);
             JSONObject j1 = profile.getJSONObject(k1);
@@ -346,6 +370,178 @@ public class ProfileFactory {
         }
 
         return resultMap;
+    }
+
+    // 生成random类型的employmentInfo的辅助方法 来自TestExample1
+    private static Map<Integer, Map<Integer, Map<Integer, Integer>>> getRandomEmploymentInfo(Map<Integer, Integer> serviceToInstanceNum, List<NetworkDevice> devices, int smallBS) {
+        Map<Integer, Map<Integer, Map<Integer, Integer>>> initDeploy = new HashMap<>();
+
+        Map<Integer, Map<Integer, Integer>> deviceIdToServiceNum = new HashMap<>();
+
+        for (int serviceId : serviceToInstanceNum.keySet()) {
+            for (int i = 0; i < serviceToInstanceNum.get(serviceId); i++) {
+                Random random = new Random();
+                int index = random.nextInt(smallBS);
+                int id = devices.get(index).getId();
+                if (deviceIdToServiceNum.containsKey(id)) {
+                    if (deviceIdToServiceNum.get(id).containsKey(serviceId)) {
+                        deviceIdToServiceNum.get(id).put(serviceId, deviceIdToServiceNum.get(id).get(serviceId) + 1);
+                    } else {
+                        deviceIdToServiceNum.get(id).put(serviceId, 1);
+                    }
+
+                } else {
+                    deviceIdToServiceNum.put(id, new HashMap<>());
+                    deviceIdToServiceNum.get(id).put(serviceId, 1);
+                }
+
+            }
+        }
+        for (int id : deviceIdToServiceNum.keySet()) {
+            Map<Integer, Integer> typeToNum0 = new HashMap<>();
+            typeToNum0.put(0, 1);
+            Map<Integer, Map<Integer, Integer>> service0To = new HashMap<>();
+            service0To.put(0, typeToNum0);
+            initDeploy.put(id, service0To);
+            for (int serviceId : deviceIdToServiceNum.get(id).keySet()) {
+                Map<Integer, Integer> typeToNum = new HashMap<>();
+                typeToNum.put(0, deviceIdToServiceNum.get(id).get(serviceId));
+                initDeploy.get(id).put(serviceId, typeToNum);
+
+            }
+
+        }
+
+        for (int j = 0; j < smallBS; j++) {
+            if (!initDeploy.containsKey(devices.get(j).getId())) {
+                Map<Integer, Integer> typeToNum0 = new HashMap<>();
+                typeToNum0.put(0, 1);
+                Map<Integer, Map<Integer, Integer>> service0To = new HashMap<>();
+                service0To.put(0, typeToNum0);
+                initDeploy.put(devices.get(j).getId(), new HashMap<>());
+                initDeploy.put(devices.get(j).getId(), service0To);
+            }
+        }
+        return initDeploy;
+    }
+
+    /**
+     * 获取服务链信息
+     * @param profile 服务链父结点的配置信息
+     * @return 服务链列表
+     */
+    @SuppressWarnings("unchecked")
+    public List<ServiceChain> getServiceChain(JSONObject profile){
+        if(!profile.containsKey("$strategy")){
+            // 没有该字段,说明serviceChain为默认的配置,交给getInstance处理
+            return (List<ServiceChain>) this.getInstance(profile,"serviceChain",ServiceChain.class);
+        }
+        else{
+            // 否则,说明serviceChain采用了ApplicationServices来读取,需要特殊处理
+            JSONObject config = profile.getJSONObject("serviceChain");
+            // 若是resource，则读取
+            if (getType(config)==BuildType.RESOURCE) {
+                String user = config.getString("$user");
+                String path = config.getString("$path");
+                config = ConfigFactory.getUserConfig(user, path);
+            }
+            String className = profile.getString("$strategy");
+            // 读取到了构造策略
+            Class<?> clazz = null;
+            Map<Integer, Map<Integer, ArrayList<Integer>>> serviceChains = new HashMap<>();
+            // 读取serviceChains配置信息
+            config = config.getJSONObject("info");
+            for (String serviceChainKey : config.keySet()) {
+                int serviceChainId = Integer.parseInt(serviceChainKey);
+                JSONObject subChainsConfig = config.getJSONObject(serviceChainKey);
+                Map<Integer, ArrayList<Integer>> subChains = new HashMap<>();
+                for (String subChainKey : subChainsConfig.keySet()) {
+                    int subChainId = Integer.parseInt(subChainKey);
+                    JSONArray jsonArray = subChainsConfig.getJSONArray(subChainKey);
+                    ArrayList<Integer> values = new ArrayList<>();
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        values.add(jsonArray.getInteger(i));
+                    }
+                    subChains.put(subChainId, values);
+                }
+                serviceChains.put(serviceChainId, subChains);
+            }
+            // 构造策略类
+            ApplicationServices strategy = null;
+            try {
+                clazz = Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException("无法找到服务链的构造策略:" + className);
+            }
+            try {
+                Constructor<?> constructor = clazz.getConstructor(Map.class);
+                strategy = (ApplicationServices) constructor.newInstance(serviceChains);
+            } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+            // 根据配置信息和策略类进行构造
+            ArrayList<ServiceChain> serviceChainList = new ArrayList<>();
+            for (int key : strategy.getServiceChainList().keySet()) {
+                serviceChainList.add(strategy.getServiceChainList().get(key));
+            }
+            return serviceChainList;
+        }
+
+//        JSONObject config = profile.getJSONObject("serviceChain");
+//        // 若是resource，则读取
+//        if (config!=null && getType(config)==BuildType.RESOURCE) {
+//            String user = config.getString("$user");
+//            String path = config.getString("$path");
+//            config = ConfigFactory.getUserConfig(user, path);
+//        }
+//
+//        String className = null;
+//        if (profile.containsKey("$strategy")) {
+//            className = profile.getString("$strategy");
+//        }
+//        if (className != null) {
+//            // 读取到了构造策略
+//            Class<?> clazz = null;
+//            Map<Integer, Map<Integer, ArrayList<Integer>>> serviceChains = new HashMap<>();
+//            // 读取serviceChains配置信息
+//            for (String serviceChainKey : config.keySet()) {
+//                int serviceChainId = Integer.parseInt(serviceChainKey);
+//                JSONObject subChainsConfig = config.getJSONObject(serviceChainKey);
+//                Map<Integer, ArrayList<Integer>> subChains = new HashMap<>();
+//                for (String subChainKey : subChainsConfig.keySet()) {
+//                    int subChainId = Integer.parseInt(subChainKey);
+//                    JSONArray jsonArray = subChainsConfig.getJSONArray(subChainKey);
+//                    ArrayList<Integer> values = new ArrayList<>();
+//                    for (int i = 0; i < jsonArray.size(); i++) {
+//                        values.add(jsonArray.getInteger(i));
+//                    }
+//                    subChains.put(subChainId, values);
+//                }
+//                serviceChains.put(serviceChainId, subChains);
+//            }
+//            // 构造策略类
+//            ApplicationServices strategy = null;
+//            try {
+//                clazz = Class.forName(className);
+//            } catch (ClassNotFoundException e) {
+//                throw new IllegalArgumentException("无法找到服务链的构造策略:" + className);
+//            }
+//            try {
+//                Constructor<?> constructor = clazz.getConstructor(Map.class);
+//                strategy = (ApplicationServices) constructor.newInstance(serviceChains);
+//            } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+//                throw new RuntimeException(e);
+//            }
+//            // 根据配置信息和策略类进行构造
+//            ArrayList<ServiceChain> serviceChainList = new ArrayList<>();
+//            for (int key : strategy.getServiceChainList().keySet()) {
+//                serviceChainList.add(strategy.getServiceChainList().get(key));
+//            }
+//            return serviceChainList;
+//        } else {
+//            // 默认情况,若没有策略，则需要逐个写
+//            return (List<ServiceChain>) this.getInstance(profile,"serviceChain",ServiceChain.class);
+//        }
     }
 
 

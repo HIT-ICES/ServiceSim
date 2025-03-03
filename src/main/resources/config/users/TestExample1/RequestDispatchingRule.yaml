@@ -1,0 +1,3 @@
+$scope: all
+$strategy: org.serviceProvider.capacities.RequestDispatchingSimple
+$type: full # Full collaboration

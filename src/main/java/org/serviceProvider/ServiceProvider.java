@@ -1,7 +1,9 @@
 package org.serviceProvider;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import javafx.util.Pair;
+import lombok.Getter;
 import org.cloudbus.cloudsim.CloudSimTags;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
@@ -20,6 +22,7 @@ import org.infrastructureProvider.policies.NetworkCloudletTimeSharedScheduler;
 import org.serviceProvider.capacities.LoadAdmission;
 import org.serviceProvider.capacities.LoadBalance;
 import org.serviceProvider.capacities.RequestDispatchingRule;
+import org.serviceProvider.services.ApplicationServices;
 import org.serviceProvider.services.MicroserviceInstance;
 import org.serviceProvider.services.ServiceChain;
 import org.slf4j.Logger;
@@ -30,6 +33,8 @@ import org.utils.ServiceSimEvents;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 
@@ -45,6 +50,9 @@ public class ServiceProvider extends DatacenterBroker {
     protected List<? extends Vm> vmsDestroyedList;
     private List<ServiceChain> serviceChain;
     private DevicesProvider devicesProvider;
+    //TODO: 可能要删除这个方法
+    // Map<Integer, Map<Integer, Map<Integer, Integer>>> initInstance
+    @Getter
     private final Map<Integer, Map<Integer, Map<Integer, Integer>>> initInstance;
 
     // failed created vms
@@ -91,14 +99,13 @@ public class ServiceProvider extends DatacenterBroker {
 
     }
 
-    @SuppressWarnings("unchecked")
     public ServiceProvider(JSONObject config){
         super(config.getString("name"));
 
         ProfileFactory factory = config.getObject("$factory", ProfileFactory.class);
 
-        List<ServiceChain> serviceChain = (List<ServiceChain>) factory.getInstance(config,"serviceChain",ServiceChain.class);
-        DevicesProvider devicesProvider = (DevicesProvider) factory.getInstance(config,"devicesProvider",DevicesProvider.class);
+        DevicesProvider devicesProvider = (DevicesProvider) factory.getInstance(config,"devicesProvider",DevicesProvider.class); //这里一定是reference,所以抽象类仅作为引用类型
+        List<ServiceChain> serviceChain = factory.getServiceChain(config);
         Map<Integer, LoadAdmission> initLoadAdmission = factory.getLoadAdmission(config.getJSONObject("loadAdmission"));
         Map<Integer, LoadBalance> initLoadBalance = factory.getLoadBalance(config.getJSONObject("loadBalance"));
         Map<Integer, RequestDispatchingRule> initRequestDispatching = factory.getRequestDispatchingRule(config.getJSONObject("requestDispatchingRule"));

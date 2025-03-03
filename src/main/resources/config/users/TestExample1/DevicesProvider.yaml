@@ -1,0 +1,6 @@
+# 使用DevicesProviderSimple1自带的createDevices()方法来创建设备
+# 后续可能需要添加这个方法对应的配置?
+$path: org.infrastructureProvider.DevicesProviderSimple1
+smallBS: 32
+meBS: 4
+router: 1

@@ -24,12 +24,14 @@ public abstract class DevicesProvider implements DeviceProviderInterface {
     {
         ProfileFactory factory = config.getObject("$factory", ProfileFactory.class);
 
+        if(!config.containsKey("devices")){return;} // 若为null，则使用自己的createDevices()方法创建设备
         // 利用工厂方法读取devices
         devices = (List<? extends NetworkDevice>) factory.getInstance(config,"devices",NetworkDevice.class);
 
         //读入routingTable：
         routingTable = new HashMap<>();
         JSONObject routingTableConfig = config.getJSONObject("routingTable");
+        if(routingTableConfig == null){return;} // 若为null，则使用自己的createDevices()方法创建路由表
         // 获取 routingTable 中的所有外层键
         for(String outKey: routingTableConfig.keySet())
         {

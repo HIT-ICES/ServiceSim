@@ -1,0 +1,25 @@
+name: ServiceProvider
+$strategy: org.serviceProvider.services.ApplicationServicesSimple # ApplicationServices的实现类，用于识别serviceChain的配置信息
+serviceChain:
+  $type: resource
+  $user: TestExample1
+  $path: ServiceChain.yaml
+devicesProvider:
+  $type: reference
+  $path: /DevicesProvider
+loadAdmission:
+  $type: resource
+  $user: TestExample1
+  $path: LoadAdmission.yaml
+loadBalance:
+  $type: resource
+  $user: TestExample1
+  $path: LoadBalance.yaml
+requestDispatchingRule:
+  $type: resource
+  $user: TestExample1
+  $path: RequestDispatchingRule.yaml
+employmentInfo:
+  $type: resource
+  $user: TestExample1
+  $path: EmploymentInfo.yaml

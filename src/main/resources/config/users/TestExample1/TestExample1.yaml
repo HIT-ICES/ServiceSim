@@ -1,0 +1,20 @@
+experimentNum: 2
+num_BSP: 1
+trace_flag: false
+DevicesProvider:
+  $type: resource
+  $user: TestExample1
+  $path: DevicesProvider.yaml
+ServiceProvider:
+  $type: resource
+  $user: TestExample1
+  $path: ServiceProvider.yaml
+EndUser:
+  name: endUser
+  simLimited: 10
+  low: 600
+  high: 600
+  timeUnit: 1
+  timeInterval: 0.005
+  serviceChainRange: 6
+  blockRange: 32

@@ -1,6 +1,8 @@
 package org.infrastructureProvider;
 
+import com.alibaba.fastjson.JSONObject;
 import org.cloudbus.cloudsim.Storage;
+import org.customBuilder.factory.ProfileFactory;
 import org.infrastructureProvider.entities.*;
 import org.infrastructureProvider.policies.PacketSchedulerTimeShared;
 import org.infrastructureProvider.policies.ShortestPathRoutingGenerator;
@@ -39,6 +41,14 @@ public class DevicesProviderSimple1 extends DevicesProvider {
         this.router = router;
         createDevices();
 
+    }
+
+    public DevicesProviderSimple1(JSONObject config) {
+        super(config);
+        smallBS = config.getInteger("smallBS");
+        meBS = config.getInteger("meBS");
+        router = config.getInteger("router");
+        createDevices();
     }
 
     @Override

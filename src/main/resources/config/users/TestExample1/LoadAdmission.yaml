@@ -1,0 +1,2 @@
+$scope: all
+$strategy: org.serviceProvider.capacities.NonLoadAdmission
